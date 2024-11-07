@@ -27,4 +27,3 @@ TARGET=cov
 
 include Makefile.inc
 
-LIBRARIES = -L$(EC_TYPES)/Build/x86-linux -lECTypes -L$(LUA)/src -lluajit

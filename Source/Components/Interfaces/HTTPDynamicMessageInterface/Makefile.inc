@@ -50,7 +50,6 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L4HttpService
 INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
-INCLUDES += -I$(EC_ROOT)
 
 all: $(OBJS) $(SUBPROJ) \
 	$(BUILD_DIR)/HttpDynamicMessageInterface$(LIBEXT) \

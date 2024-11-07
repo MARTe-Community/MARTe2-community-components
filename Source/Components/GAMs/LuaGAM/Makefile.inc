@@ -46,7 +46,6 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/Scheduler/L5GAMs
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
-INCLUDES += -I$(EC_ROOT)
 
 INCLUDES += -I$(LUA)/src
 LIBRARIES = -L$(LUA)/src -lluajit

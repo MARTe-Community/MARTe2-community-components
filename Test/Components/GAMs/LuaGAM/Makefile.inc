@@ -44,13 +44,11 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/Scheduler/L5GAMs
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
-INCLUDES += -I$(EC_ROOT)
 
 INCLUDES += -I$(ROOT_DIR)/Source/Components/GAMs/LuaGAM
 INCLUDES += -I$(ROOT_DIR)/Source/Components/GAMs/LuaGAM/luajit/src
 INCLUDES += -I$(ROOT_DIR)/Test/Components/Utils
 
-LIBRARIES += -L$(EC_ROOT)/Build/$(TARGET) -lECTypes
 INCLUDES += -L$(ROOT_DIR)/Source/Components/GAMs/LuaGAM/luajit/src -lluajit
 
 all: $(OBJS) \

@@ -46,11 +46,8 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/Scheduler/L4LoggerService
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
-INCLUDES += -I$(EC_ROOT)
 
 INCLUDES += -I$(ROOT_DIR)/Source/Components/Interfaces/JSONLogger
-
-LIBRARIES += -L$(EC_ROOT)/Build/$(TARGET) -lECTypes
 
 all: $(OBJS) \
                 $(BUILD_DIR)/JSONLoggerGTest$(LIBEXT)
