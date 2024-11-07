@@ -1,0 +1,651 @@
+==== TEST ====
+Empty statements
+==== CODE ====
+;
+;;
+==== AST  ====
+(BLOCK
+    (STAT tok:SEMCOL val:`;`)
+    (STAT tok:SEMCOL val:`;`)
+    (STAT tok:SEMCOL val:`;`)
+)
+==== DONE ====
+==== TEST ====
+Return statement
+==== CODE ====
+return 42
+==== AST  ====
+(BLOCK
+    (RETSTAT tok:RETURN val:`return`
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`42`)
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Assignment statement
+==== CODE ====
+i = 1
+j, tbl[k()] = 2, i + 1
+x, y = y, x
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`i`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`1`)
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`j`)
+            )
+            (VAR
+                (PREFIXEXP tok:ID val:`tbl`)
+                (EXP
+                    (FUNCTIONCALL
+                        (PREFIXEXP tok:ID val:`k`)
+                        (ARGS
+                            (EXPLIST
+                                (EXP)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`2`)
+            )
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`i`)
+                )
+                (BINOP tok:ADD val:`+`)
+                (NUMERAL tok:NUM val:`1`)
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`x`)
+            )
+            (VAR
+                (NAME tok:ID val:`y`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`y`)
+                )
+            )
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`x`)
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Assignment statement
+==== CODE ====
+f1()
+tbl.f2()
+tbl["f2"]()
+tbl.k1:f3()
+f4(a1)("a2") { a3 = "a3" }
+==== AST  ====
+(BLOCK
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`f1`)
+            (ARGS
+                (EXPLIST
+                    (EXP)
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (PREFIXEXP tok:ID val:`f2`)
+            (ARGS
+                (EXPLIST
+                    (EXP)
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (PREFIXEXP
+                (LITERALSTRING tok:STRING val:`"f2"`)
+            )
+            (ARGS
+                (EXPLIST
+                    (EXP)
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (PREFIXEXP tok:ID val:`k1`)
+            (NAME tok:ID val:`f3`)
+            (ARGS
+                (EXPLIST
+                    (EXP)
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`f4`)
+            (PREFIXEXP
+                (EXPLIST
+                    (EXP
+                        (VAR
+                            (NAME tok:ID val:`a1`)
+                        )
+                    )
+                )
+            )
+            (PREFIXEXP
+                (EXPLIST
+                    (EXP
+                        (LITERALSTRING tok:STRING val:`"a2"`)
+                    )
+                )
+            )
+            (ARGS
+                (TABLECONSTRUCTOR
+                    (FIELDLIST
+                        (FIELD
+                            (NAME tok:ID val:`a3`)
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`"a3"`)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Label statement
+==== CODE ====
+:: label_name ::
+==== AST  ====
+(BLOCK
+    (STAT tok:COLCOL val:`::`
+        (LABEL tok:ID val:`label_name`)
+    )
+)
+==== DONE ====
+==== TEST ====
+Break statement
+==== CODE ====
+for k, v in pairs(kv) do
+  if not v then
+    break
+  end
+end
+==== AST  ====
+(BLOCK
+    (STAT tok:FOR val:`for`
+        (NAMELIST
+            (NAME tok:ID val:`k`)
+            (NAME tok:ID val:`v`)
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`pairs`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`kv`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (BLOCK
+            (STAT tok:IF val:`if`
+                (EXP
+                    (UNOP tok:NOT val:`not`)
+                    (VAR
+                        (NAME tok:ID val:`v`)
+                    )
+                )
+                (BLOCK
+                    (STAT tok:BREAK val:`break`)
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Goto statement
+==== CODE ====
+goto label_name
+==== AST  ====
+(BLOCK
+    (STAT tok:GOTO val:`goto`
+        (NAME tok:ID val:`label_name`)
+    )
+)
+==== DONE ====
+==== TEST ====
+Do statement
+==== CODE ====
+do
+  f1()
+  return f2()
+end
+do end
+==== AST  ====
+(BLOCK
+    (STAT tok:DO val:`do`
+        (BLOCK
+            (STAT
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`f1`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP)
+                        )
+                    )
+                )
+            )
+            (RETSTAT tok:RETURN val:`return`
+                (EXPLIST
+                    (EXP
+                        (FUNCTIONCALL
+                            (PREFIXEXP tok:ID val:`f2`)
+                            (ARGS
+                                (EXPLIST
+                                    (EXP)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT tok:DO val:`do`
+        (BLOCK)
+    )
+)
+==== DONE ====
+==== TEST ====
+While statement
+==== CODE ====
+while i < 9 do
+  i = i + 1
+end
+while false do end
+==== AST  ====
+(BLOCK
+    (STAT tok:WHILE val:`while`
+        (EXP
+            (VAR
+                (NAME tok:ID val:`i`)
+            )
+            (BINOP tok:LT val:`<`)
+            (NUMERAL tok:NUM val:`9`)
+        )
+        (BLOCK
+            (STAT
+                (VARLIST
+                    (VAR
+                        (NAME tok:ID val:`i`)
+                    )
+                )
+                (EXPLIST
+                    (EXP
+                        (VAR
+                            (NAME tok:ID val:`i`)
+                        )
+                        (BINOP tok:ADD val:`+`)
+                        (NUMERAL tok:NUM val:`1`)
+                    )
+                )
+            )
+        )
+    )
+    (STAT tok:WHILE val:`while`
+        (EXP
+            (VALUE tok:FALSE val:`false`)
+        )
+        (BLOCK)
+    )
+)
+==== DONE ====
+==== TEST ====
+Repeat statement
+==== CODE ====
+repeat
+  f1()
+  i = i - 1
+until i == 0
+repeat until false
+==== AST  ====
+(BLOCK
+    (STAT tok:REPEAT val:`repeat`
+        (BLOCK
+            (STAT
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`f1`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP)
+                        )
+                    )
+                )
+            )
+            (STAT
+                (VARLIST
+                    (VAR
+                        (NAME tok:ID val:`i`)
+                    )
+                )
+                (EXPLIST
+                    (EXP
+                        (VAR
+                            (NAME tok:ID val:`i`)
+                        )
+                        (BINOP tok:MINUS val:`-`)
+                        (NUMERAL tok:NUM val:`1`)
+                    )
+                )
+            )
+        )
+        (EXP
+            (VAR
+                (NAME tok:ID val:`i`)
+            )
+            (BINOP tok:EQ val:`==`)
+            (NUMERAL tok:NUM val:`0`)
+        )
+    )
+    (STAT tok:REPEAT val:`repeat`
+        (BLOCK)
+        (EXP
+            (VALUE tok:FALSE val:`false`)
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+If statement
+==== CODE ====
+if num % 2 == 0 then
+  print("even")
+elseif num % 2 ~= 0 then
+  print("odd")
+else
+  error("!")
+end
+if c1 then end
+if c1 then else end
+if c1 then elseif c2 then else end
+==== AST  ====
+(BLOCK
+    (STAT tok:IF val:`if`
+        (EXP
+            (VAR
+                (NAME tok:ID val:`num`)
+            )
+            (BINOP tok:MOD val:`%`)
+            (NUMERAL tok:NUM val:`2`)
+            (BINOP tok:EQ val:`==`)
+            (NUMERAL tok:NUM val:`0`)
+        )
+        (BLOCK
+            (STAT
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`print`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`"even"`)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (STAT tok:ELSEIF val:`elseif`
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`num`)
+                )
+                (BINOP tok:MOD val:`%`)
+                (NUMERAL tok:NUM val:`2`)
+                (BINOP tok:NEQ val:`~=`)
+                (NUMERAL tok:NUM val:`0`)
+            )
+            (BLOCK
+                (STAT
+                    (FUNCTIONCALL
+                        (PREFIXEXP tok:ID val:`print`)
+                        (ARGS
+                            (EXPLIST
+                                (EXP
+                                    (LITERALSTRING tok:STRING val:`"odd"`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (STAT tok:ELSE val:`else`
+            (BLOCK
+                (STAT
+                    (FUNCTIONCALL
+                        (PREFIXEXP tok:ID val:`error`)
+                        (ARGS
+                            (EXPLIST
+                                (EXP
+                                    (LITERALSTRING tok:STRING val:`"!"`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT tok:IF val:`if`
+        (EXP
+            (VAR
+                (NAME tok:ID val:`c1`)
+            )
+        )
+        (BLOCK)
+    )
+    (STAT tok:IF val:`if`
+        (EXP
+            (VAR
+                (NAME tok:ID val:`c1`)
+            )
+        )
+        (BLOCK)
+        (STAT tok:ELSE val:`else`
+            (BLOCK)
+        )
+    )
+    (STAT tok:IF val:`if`
+        (EXP
+            (VAR
+                (NAME tok:ID val:`c1`)
+            )
+        )
+        (BLOCK)
+        (STAT tok:ELSEIF val:`elseif`
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`c2`)
+                )
+            )
+            (BLOCK)
+        )
+        (STAT tok:ELSE val:`else`
+            (BLOCK)
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+For generic
+==== CODE ====
+for k, v in pairs(kv) do
+  print(k, v)
+end
+for i in ipairs(iv) do end
+==== AST  ====
+(BLOCK
+    (STAT tok:FOR val:`for`
+        (NAMELIST
+            (NAME tok:ID val:`k`)
+            (NAME tok:ID val:`v`)
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`pairs`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`kv`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (BLOCK
+            (STAT
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`print`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`k`)
+                                )
+                            )
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`v`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT tok:FOR val:`for`
+        (NAMELIST
+            (NAME tok:ID val:`i`)
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`ipairs`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`iv`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (BLOCK)
+    )
+)
+==== DONE ====
+==== TEST ====
+For numeric
+==== CODE ====
+for n = 1, 10 do
+  print(n)
+end
+for n = 1, 10, 2 do end
+==== AST  ====
+(BLOCK
+    (STAT tok:FOR val:`for`
+        (NAME tok:ID val:`n`)
+        (EXP
+            (NUMERAL tok:NUM val:`1`)
+        )
+        (EXP
+            (NUMERAL tok:NUM val:`10`)
+        )
+        (BLOCK
+            (STAT
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`print`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`n`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT tok:FOR val:`for`
+        (NAME tok:ID val:`n`)
+        (EXP
+            (NUMERAL tok:NUM val:`1`)
+        )
+        (EXP
+            (NUMERAL tok:NUM val:`10`)
+        )
+        (EXP
+            (NUMERAL tok:NUM val:`2`)
+        )
+        (BLOCK)
+    )
+)
+==== DONE ====

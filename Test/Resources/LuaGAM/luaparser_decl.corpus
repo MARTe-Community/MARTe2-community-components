@@ -1,0 +1,171 @@
+==== TEST ====
+Function declaration
+==== CODE ====
+function tbl.f1() end
+function tbl:f2() end
+function tbl.k1:f3() end
+function f4()
+  print('f4')
+end
+local function f5() end
+==== AST  ====
+(BLOCK
+    (STAT tok:FUNCTION val:`function`
+        (FUNCNAME tok:ID val:`tbl`
+            (NAME tok:ID val:`f1`)
+        )
+        (FUNCBODY
+            (BLOCK)
+        )
+    )
+    (STAT tok:FUNCTION val:`function`
+        (FUNCNAME tok:ID val:`tbl`
+            (NAME tok:ID val:`f2`)
+        )
+        (FUNCBODY
+            (BLOCK)
+        )
+    )
+    (STAT tok:FUNCTION val:`function`
+        (FUNCNAME tok:ID val:`tbl`
+            (NAME tok:ID val:`k1`)
+            (NAME tok:ID val:`f3`)
+        )
+        (FUNCBODY
+            (BLOCK)
+        )
+    )
+    (STAT tok:FUNCTION val:`function`
+        (FUNCNAME tok:ID val:`f4`)
+        (FUNCBODY
+            (BLOCK
+                (STAT
+                    (FUNCTIONCALL
+                        (PREFIXEXP tok:ID val:`print`)
+                        (ARGS
+                            (EXPLIST
+                                (EXP
+                                    (LITERALSTRING tok:STRING val:`'f4'`)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (LOCALFUNCTION tok:FUNCTION val:`function`)
+        (NAME tok:ID val:`f5`)
+        (FUNCBODY
+            (BLOCK)
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Variable declaration
+==== CODE ====
+local v1 = 1
+local v2, v3 = 2, 3
+local v4, v4 = f1(), tbl:f2()
+==== AST  ====
+(BLOCK
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`v1`)
+        )
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`1`)
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`v2`)
+            (NAME tok:ID val:`v3`)
+        )
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`2`)
+            )
+            (EXP
+                (NUMERAL tok:NUM val:`3`)
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`v4`)
+            (NAME tok:ID val:`v4`)
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`f1`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP)
+                        )
+                    )
+                )
+            )
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (NAME tok:ID val:`f2`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP)
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Attribut declaration 
+==== CODE ====
+local c <const>, x <const> = 42
+local f <close> = io.open('/a.lua')
+==== AST  ====
+(BLOCK
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`c`)
+            (ATTRIB tok:ID val:`const`)
+            (NAME tok:ID val:`x`)
+            (ATTRIB tok:ID val:`const`)
+        )
+        (EXPLIST
+            (EXP
+                (NUMERAL tok:NUM val:`42`)
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`f`)
+            (ATTRIB tok:ID val:`close`)
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`io`)
+                    (PREFIXEXP tok:ID val:`open`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'/a.lua'`)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====

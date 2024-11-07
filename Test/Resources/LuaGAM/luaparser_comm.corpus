@@ -1,0 +1,126 @@
+==== TEST ====
+Comments 1
+==== CODE ====
+--
+
+-- single-line comment, below an empty single-line comment
+
+--[[]]
+
+--[[
+print("block comment")
+--]]
+
+--[[
+print("block comment")
+]]
+
+-- [[
+print("not block comment")
+--]]
+
+--[=[[print("level 1 block comment")]]=]
+
+--[=[
+  [print("level 1 block comment")]
+]=]
+
+==== AST  ====
+(BLOCK
+    (COMMENT tok:COMM val:`--`)
+    (COMMENT tok:COMM val:`-- single-line comment, below an empty single-line comment`)
+    (COMMENT tok:COMM val:`--[[]]`)
+    (COMMENT tok:COMM val:`--[[
+print("block comment")
+--]]`)
+    (COMMENT tok:COMM val:`--[[
+print("block comment")
+]]`)
+    (COMMENT tok:COMM val:`-- [[`)
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`print`)
+            (ARGS
+                (EXPLIST
+                    (EXP
+                        (LITERALSTRING tok:STRING val:`"not block comment"`)
+                    )
+                )
+            )
+        )
+    )
+    (COMMENT tok:COMM val:`--]]`)
+    (COMMENT tok:COMM val:`--[=[[print("level 1 block comment")]]=]
+
+
+--[=[
+  [print("level 1 block comment")]
+]=]`)
+)
+==== DONE ====
+==== TEST ====
+Comments 2
+==== CODE ====
+--[=[
+  [print("level 1 block comment")
+]=]
+
+--[=[
+  print("level 1 block comment")]
+]=]
+
+--[=[
+  [[print("level 1 block comment")
+]=]
+
+--[=[
+  print("level 1 block comment")]]
+]=]
+
+--[==[
+print("level 2 block comment")
+-- ]==]
+
+--[==[f
+print("level 2 block comment")
+]==]
+
+-- [==[
+print("not level 2 block comment")
+--]==]
+==== AST  ====
+(BLOCK
+    (COMMENT tok:COMM val:`--[=[
+  [print("level 1 block comment")
+]=]`)
+    (COMMENT tok:COMM val:`--[=[
+  print("level 1 block comment")]
+]=]`)
+    (COMMENT tok:COMM val:`--[=[
+  [[print("level 1 block comment")
+]=]`)
+    (COMMENT tok:COMM val:`--[=[
+  print("level 1 block comment")]]
+]=]`)
+    (COMMENT tok:COMM val:`--[==[
+print("level 2 block comment")
+-- ]==]`)
+    (COMMENT tok:COMM val:`--[==[f
+print("level 2 block comment")
+]==]`)
+    (COMMENT tok:COMM val:`-- [==[`)
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`print`)
+            (ARGS
+                (EXPLIST
+                    (EXP
+                        (LITERALSTRING tok:STRING val:`"not level 2 block comment"`)
+                    )
+                )
+            )
+        )
+    )
+    (COMMENT tok:COMM val:`--]==]`)
+)
+==== DONE ====

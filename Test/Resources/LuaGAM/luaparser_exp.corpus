@@ -1,0 +1,612 @@
+==== TEST ====
+Table expressions
+==== CODE ====
+v1 = tbl[k1]
+v2, v3[v] = tbl[k1]['k2']
+v4 = tbk[getK1()][getK2()]
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v1`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (EXP
+                        (VAR
+                            (NAME tok:ID val:`k1`)
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v2`)
+            )
+            (VAR
+                (PREFIXEXP tok:ID val:`v3`)
+                (EXP
+                    (VAR
+                        (NAME tok:ID val:`v`)
+                    )
+                )
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (PREFIXEXP
+                        (VAR
+                            (NAME tok:ID val:`k1`)
+                        )
+                    )
+                    (EXP
+                        (LITERALSTRING tok:STRING val:`'k2'`)
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v4`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (PREFIXEXP tok:ID val:`tbk`)
+                    (PREFIXEXP
+                        (FUNCTIONCALL
+                            (PREFIXEXP tok:ID val:`getK1`)
+                            (ARGS
+                                (EXPLIST
+                                    (EXP)
+                                )
+                            )
+                        )
+                    )
+                    (EXP
+                        (FUNCTIONCALL
+                            (PREFIXEXP tok:ID val:`getK2`)
+                            (ARGS
+                                (EXPLIST
+                                    (EXP)
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Key expressions
+==== CODE ====
+v1 = tbl.k1
+v2 = tbl.k1.k2
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v1`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (NAME tok:ID val:`k1`)
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v2`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (PREFIXEXP tok:ID val:`k1`)
+                    (NAME tok:ID val:`k2`)
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Table, key and fn expressions
+==== CODE ====
+v1 = tbl[k1].k2(a1, 'a2', a3())
+v2 = tbl[k1] { f1 = true }
+v3 = tbl[k1] 'a1'
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v1`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (PREFIXEXP
+                        (VAR
+                            (NAME tok:ID val:`k1`)
+                        )
+                    )
+                    (PREFIXEXP tok:ID val:`k2`)
+                    (ARGS
+                        (EXPLIST
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`a1`)
+                                )
+                            )
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'a2'`)
+                            )
+                            (EXP
+                                (FUNCTIONCALL
+                                    (PREFIXEXP tok:ID val:`a3`)
+                                    (ARGS
+                                        (EXPLIST
+                                            (EXP)
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v2`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (PREFIXEXP
+                        (VAR
+                            (NAME tok:ID val:`k1`)
+                        )
+                    )
+                    (ARGS
+                        (TABLECONSTRUCTOR
+                            (FIELDLIST
+                                (FIELD
+                                    (NAME tok:ID val:`f1`)
+                                    (EXP
+                                        (VALUE tok:TRUE val:`true`)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v3`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (FUNCTIONCALL
+                    (PREFIXEXP tok:ID val:`tbl`)
+                    (PREFIXEXP
+                        (VAR
+                            (NAME tok:ID val:`k1`)
+                        )
+                    )
+                    (ARGS
+                        (LITERALSTRING tok:STRING val:`'a1'`)
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Function call with arguments 
+==== CODE ====
+tbl.k1:m1(a1,'a2')
+tbl[k1]:m1 { f1,'f2'}
+tbl:m1 'a1'
+==== AST  ====
+(BLOCK
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (PREFIXEXP tok:ID val:`k1`)
+            (NAME tok:ID val:`m1`)
+            (ARGS
+                (EXPLIST
+                    (EXP
+                        (VAR
+                            (NAME tok:ID val:`a1`)
+                        )
+                    )
+                    (EXP
+                        (LITERALSTRING tok:STRING val:`'a2'`)
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (PREFIXEXP
+                (VAR
+                    (NAME tok:ID val:`k1`)
+                )
+            )
+            (NAME tok:ID val:`m1`)
+            (ARGS
+                (TABLECONSTRUCTOR
+                    (FIELDLIST
+                        (FIELD
+                            (EXP
+                                (VAR
+                                    (NAME tok:ID val:`f1`)
+                                )
+                            )
+                        )
+                        (FIELDSEP tok:COMMA val:`,`)
+                        (FIELD
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'f2'`)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (STAT
+        (FUNCTIONCALL
+            (PREFIXEXP tok:ID val:`tbl`)
+            (NAME tok:ID val:`m1`)
+            (ARGS
+                (LITERALSTRING tok:STRING val:`'a1'`)
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ====
+Simple boolean expressions
+==== CODE ====
+v = (true)
+v = ( ( false ) )
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (EXP
+                    (VALUE tok:TRUE val:`true`)
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (EXP
+                    (EXP
+                        (VALUE tok:FALSE val:`false`)
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ==== 
+More table expressions
+==== CODE ====
+tbl1 = {
+    ['k1'] = {
+      ['k2'] = true,
+      k3 = false
+    }
+}
+local tbl2 = {
+  k1 = {
+    { 'v1', 'v2' }
+  }
+}
+local tbl3 = { 'v1', k1 = 'v2' }
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`tbl1`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (TABLECONSTRUCTOR
+                    (FIELDLIST
+                        (FIELD
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'k1'`)
+                            )
+                            (EXP
+                                (TABLECONSTRUCTOR
+                                    (FIELDLIST
+                                        (FIELD
+                                            (EXP
+                                                (LITERALSTRING tok:STRING val:`'k2'`)
+                                            )
+                                            (EXP
+                                                (VALUE tok:TRUE val:`true`)
+                                            )
+                                        )
+                                        (FIELDSEP tok:COMMA val:`,`)
+                                        (FIELD
+                                            (NAME tok:ID val:`k3`)
+                                            (EXP
+                                                (VALUE tok:FALSE val:`false`)
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`tbl2`)
+        )
+        (EXPLIST
+            (EXP
+                (TABLECONSTRUCTOR
+                    (FIELDLIST
+                        (FIELD
+                            (NAME tok:ID val:`k1`)
+                            (EXP
+                                (TABLECONSTRUCTOR
+                                    (FIELDLIST
+                                        (FIELD
+                                            (EXP
+                                                (TABLECONSTRUCTOR
+                                                    (FIELDLIST
+                                                        (FIELD
+                                                            (EXP
+                                                                (LITERALSTRING tok:STRING val:`'v1'`)
+                                                            )
+                                                        )
+                                                        (FIELDSEP tok:COMMA val:`,`)
+                                                        (FIELD
+                                                            (EXP
+                                                                (LITERALSTRING tok:STRING val:`'v2'`)
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    (LOCALSTAT tok:LOCAL val:`local`
+        (ATTNAMELIST
+            (NAME tok:ID val:`tbl3`)
+        )
+        (EXPLIST
+            (EXP
+                (TABLECONSTRUCTOR
+                    (FIELDLIST
+                        (FIELD
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'v1'`)
+                            )
+                        )
+                        (FIELDSEP tok:COMMA val:`,`)
+                        (FIELD
+                            (NAME tok:ID val:`k1`)
+                            (EXP
+                                (LITERALSTRING tok:STRING val:`'v2'`)
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ==== 
+Binary ops expressions
+==== CODE ====
+a = i + j * 3 - k % 5
+b = i + j % 3 ^ 2
+c = i * 2 ^ j
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`a`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`i`)
+                )
+                (BINOP tok:ADD val:`+`)
+                (VAR
+                    (NAME tok:ID val:`j`)
+                )
+                (BINOP tok:MULT val:`*`)
+                (NUMERAL tok:NUM val:`3`)
+                (BINOP tok:MINUS val:`-`)
+                (VAR
+                    (NAME tok:ID val:`k`)
+                )
+                (BINOP tok:MOD val:`%`)
+                (NUMERAL tok:NUM val:`5`)
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`b`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`i`)
+                )
+                (BINOP tok:ADD val:`+`)
+                (VAR
+                    (NAME tok:ID val:`j`)
+                )
+                (BINOP tok:MOD val:`%`)
+                (NUMERAL tok:NUM val:`3`)
+                (BINOP tok:POW val:`^`)
+                (NUMERAL tok:NUM val:`2`)
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`c`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (VAR
+                    (NAME tok:ID val:`i`)
+                )
+                (BINOP tok:MULT val:`*`)
+                (NUMERAL tok:NUM val:`2`)
+                (BINOP tok:POW val:`^`)
+                (VAR
+                    (NAME tok:ID val:`j`)
+                )
+            )
+        )
+    )
+)
+==== DONE ====
+==== TEST ==== 
+Unary operator expressions
+==== CODE ====
+v1 = #l
+v2 = -n
+v3 = not c1 and r1 or r2
+==== AST  ====
+(BLOCK
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v1`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (UNOP tok:LENGTH val:`#`)
+                (VAR
+                    (NAME tok:ID val:`l`)
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v2`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (UNOP tok:MINUS val:`-`)
+                (VAR
+                    (NAME tok:ID val:`n`)
+                )
+            )
+        )
+    )
+    (STAT
+        (VARLIST
+            (VAR
+                (NAME tok:ID val:`v3`)
+            )
+        )
+        (EXPLIST
+            (EXP
+                (UNOP tok:NOT val:`not`)
+                (VAR
+                    (NAME tok:ID val:`c1`)
+                )
+                (BINOP tok:AND val:`and`)
+                (VAR
+                    (NAME tok:ID val:`r1`)
+                )
+                (BINOP tok:OR val:`or`)
+                (VAR
+                    (NAME tok:ID val:`r2`)
+                )
+            )
+        )
+    )
+)
+==== DONE ====
