@@ -335,15 +335,15 @@ bool check_variable(Nodep node, const char8 *name, LuaNode node_type,
  * @param[out] ok flag for correct linearization
  * @return list of lines.
  */
-charList linearize(const char8 *code) {
-  charList lines;
-  ect::Str code_s = code;
+strList linearize(const char8 *code) {
+  strList lines;
+  Str code_s = code;
   uint32 code_pos = 0;
   code_s = code_s + '\n';
   int32 newline_i = code_s.find("\n");
   while (newline_i >= 0) {
     uint32 nl = newline_i == 0 ? (newline_i + 1) : newline_i;
-    ect::Str line = code_s.substr(0, nl);
+    Str line = code_s.substr(0, nl);
     if (line.len() > 0) {
       lines.append(line);
     }
@@ -362,18 +362,18 @@ charList linearize(const char8 *code) {
  * @param[in] is_string expected string flag
  * @param[in] ok flag for correct tokenization
  */
-Tokenp get_long_bracket_token(charList code_lines, uint32 &line_index,
+Tokenp get_long_bracket_token(strList code_lines, uint32 &line_index,
                               uint32 &line_pos, uint32 &char_pos,
                               bool is_string, bool &ok) {
   Tokenp t;
   uint32 len_token = 0;
   uint32 add_tok_len = 1;
-  ect::Str line = code_lines[line_index];
+  Str line = code_lines[line_index];
   if (!is_string) {
     add_tok_len = 3;
   }
-  ect::Str closing_long_bracket = "]";
-  ect::Str long_token = "";
+  Str closing_long_bracket = "]";
+  Str long_token = "";
   uint32 long_bracket_level = 0;
   while (ok) {
     if (line[line_pos + char_pos + long_bracket_level + add_tok_len] == '=') {
@@ -388,7 +388,7 @@ Tokenp get_long_bracket_token(charList code_lines, uint32 &line_index,
     }
   }
   if (ok) {
-    ect::Str line_str = line;
+    Str line_str = line;
     uint32 init_line_index = line_index;
     int32 end_index = line_str.find(closing_long_bracket);
     if (end_index < 0 && line_index + 1 < code_lines.len()) {
@@ -419,7 +419,7 @@ Tokenp get_long_bracket_token(charList code_lines, uint32 &line_index,
 }
 
 tokens_t scan(const char8 *code, bool &ok) {
-  charList lines = linearize(code);
+  strList lines = linearize(code);
   tokens_t tokens;
   uint32 line_pos = 0;
   uint32 char_pos = 0;
@@ -427,7 +427,7 @@ tokens_t scan(const char8 *code, bool &ok) {
   uint32 line_index = 0;
 
   while (line_index < lines.len()) {
-    ect::Str line = lines[line_index];
+    Str line = lines[line_index];
     line_pos = 0;
     char_pos = 0;
 

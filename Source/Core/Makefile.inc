@@ -24,7 +24,7 @@
 
 OBJSX=
 
-SPB = Helpers.x
+SPB = Helpers.x Types.x
 
 ROOT_DIR=../../..
 
@@ -35,6 +35,7 @@ MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
+INCLUDES += -I$(ROOT_DIR)/Source/Core/Types
 
 all: $(OBJS)  $(SUBPROJ)
 	echo  $(OBJS)

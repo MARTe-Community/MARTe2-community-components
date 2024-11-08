@@ -1,5 +1,5 @@
-#ifndef _LLIST_H__
-#define _LLIST_H__
+#ifndef LIST_H__
+#define LIST_H__
 
 #include <assert.h>
 #include "CompilerTypes.h"

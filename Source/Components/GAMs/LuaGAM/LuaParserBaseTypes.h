@@ -2,8 +2,9 @@
 #define LUA_PARSER_BASE_TYPES_H__
 
 #include "CompilerTypes.h"
-#include "ec-types/include/llist.h"
-#include "ec-types/include/ptr.h"
+#include "List.h"
+#include "Rc.h"
+#include "Str.h"
 
 #define MAX_LENGTH 256
 #define NUM_LUA_SYNTAX_ELEMENTS 63
@@ -12,7 +13,7 @@
 
 namespace MARTe {
 namespace LUA {
-typedef ect::List<ect::Str> charList;
+typedef List<Str> strList;
 enum LuaToken {
   REQUIRE = 0,
   ENDCODE,
@@ -229,18 +230,18 @@ struct Token {
   /**
    * @brief Print Token characteristics
    */
-  ect::Str toString(bool show_type = true, bool show_val = true);
+  Str toString(bool show_type = true, bool show_val = true);
 
-  ect::Str raw; //!< Token name
-  uint32 type;  //!< Token type
-  uint32 row;   //!< Row number of the token in the lua code
-  uint32 col;   //!< Column number of the token in the lua code
-  bool unop;    //!< flag to design unary operators
-  bool binop;   //!< flag to design binary operators
+  Str raw;     //!< Token name
+  uint32 type; //!< Token type
+  uint32 row;  //!< Row number of the token in the lua code
+  uint32 col;  //!< Column number of the token in the lua code
+  bool unop;   //!< flag to design unary operators
+  bool binop;  //!< flag to design binary operators
 };
 
-typedef ect::ptr<Token> Tokenp;
-typedef ect::List<Tokenp> TokenpList;
+typedef Rc<Token> Tokenp;
+typedef List<Tokenp> TokenpList;
 struct tokens_t {
 
   /**
@@ -255,7 +256,7 @@ struct tokens_t {
    * @param[in] row row in code
    * @param[in] col column in code
    */
-  void add(ect::Str t, uint32 row, uint32 col);
+  void add(Str t, uint32 row, uint32 col);
 
   /**
    * @brief Add token to list
@@ -278,7 +279,7 @@ struct tokens_t {
   /**
    * @brief Add long brackets token
    */
-  void add_long_bracket_token(charList code_lines, uint32 &line_index,
+  void add_long_bracket_token(strList code_lines, uint32 &line_index,
                               uint32 &line_pos, uint32 &char_pos,
                               bool is_string, bool &ok);
 
@@ -320,7 +321,7 @@ struct tokens_t {
 class Node {
 
 public:
-  typedef ect::ptr<Node> Nodep;
+  typedef Rc<Node> Nodep;
 
   /**
    * @brief Empty onstrucor
@@ -357,8 +358,8 @@ public:
   /**
    * @brief Print node characteristics
    */
-  ect::Str toString(uint32 indent = 0, uint32 indent_level = 4,
-                    bool show_values = false);
+  Str toString(uint32 indent = 0, uint32 indent_level = 4,
+               bool show_values = false);
 
   /**
    * @brief Check if the node has a token or subnodes
@@ -371,13 +372,13 @@ public:
    */
   void del();
 
-  Tokenp tok;                 //!< Token linked to this node
-  LuaNode type;               //!< Node type
-  ect::List<Nodep> sub_nodes; //!< List of children nodes
+  Tokenp tok;            //!< Token linked to this node
+  LuaNode type;          //!< Node type
+  List<Nodep> sub_nodes; //!< List of children nodes
 };
 
-typedef ect::ptr<Node> Nodep;
-typedef ect::List<Nodep> NodepList;
+typedef Rc<Node> Nodep;
+typedef List<Nodep> NodepList;
 } // namespace LUA
 } // namespace MARTe
 

@@ -43,8 +43,7 @@
 #include "StructuredDataI.h"
 #include "TypeDescriptor.h"
 #include "Verifier.h"
-#include "ec-types/include/basetypes.h"
-#include "ec-types/include/optional.h"
+#include "Option.h"
 
 #include <cstring>
 #include <stdint.h>
@@ -289,7 +288,7 @@ bool push_integer_array(lua_State *L, const char8 *name, void *ptr,
  * @param[in] size default to 1 for non-array variables
  */
 bool push_boolean(lua_State *L, const char8 *name, void *ptr, uint32 size) {
-  ect::u8 var = *(ect::u8 *)ptr;
+  uint8 var = *(uint8 *)ptr;
   if (var > 1) {
     ERROR_SIG_VAR_RANGE(name);
     return false;
@@ -309,7 +308,7 @@ bool push_boolean(lua_State *L, const char8 *name, void *ptr, uint32 size) {
  */
 bool push_boolean_array(lua_State *L, const char8 *name, void *ptr,
                         uint32 size) {
-  ect::u8 *array = (ect::u8 *)ptr;
+  uint8 *array = (uint8 *)ptr;
   lua_newtable(L);
   for (uint32 i = 0; i < size; i++) {
     if (array[i] > 1) {
@@ -642,11 +641,11 @@ bool LuaGAM::IsCodeExternal() {
   return file_path != NULL_PTR(char8*);
 }
 
-ect::Optional<const char8*> LuaGAM::CodePath(){
+Option<const char8*> LuaGAM::CodePath(){
   if (IsCodeExternal()){
     return file_path;
   }
-  return ect::Optional<const char8*>();
+  return Option<const char8*>();
 }
 
 bool LuaGAM::Initialise(StructuredDataI &data) {

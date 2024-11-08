@@ -24,6 +24,7 @@
 
 OBJSX = MessageInterfaceTest.x MessageInterfaceGTest.x
 
+PACKAGE=Components/Interfaces
 ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
@@ -44,7 +45,9 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/Scheduler/L5GAMs
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L4HttpService
-INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
+INCLUDES += -I$(ROOT_DIR)/Source/Core/Helpers
+INCLUDES += -I$(ROOT_DIR)/Source/Core/Types
+INCLUDES += -I$(ROOT_DIR)/Test/Testing
 
 INCLUDES += -I$(ROOT_DIR)/Source/Components/Interfaces/HTTPDynamicMessageInterface
 

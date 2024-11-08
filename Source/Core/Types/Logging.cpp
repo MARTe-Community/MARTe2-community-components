@@ -1,13 +1,13 @@
-#include "logging.h"
+#include "Logging.h"
+#include <pthread.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <unistd.h>
 
-namespace ect {
+namespace MARTe {
 namespace log {
 static bool __init = false;
 static level_e __log_level = ERROR;
@@ -72,4 +72,4 @@ void init() {
 }
 
 } // namespace log
-} // namespace ect
+} // namespace MARTe

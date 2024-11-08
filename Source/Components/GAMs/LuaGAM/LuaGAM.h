@@ -30,7 +30,7 @@
 /*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
 #include "AST.h"
-#include "ec-types/include/optional.h"
+#include "Option.h"
 #include "lua.hpp"
 
 /*---------------------------------------------------------------------------*/
@@ -113,7 +113,7 @@ public:
    * @brief Get code file path, if any.
    * @return file path if any.
    **/
-  ect::Optional<const char8 *> CodePath();
+  Option<const char8 *> CodePath();
 
 private:
   char8 *code;      //!< Lua code

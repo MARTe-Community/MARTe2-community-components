@@ -1,30 +1,30 @@
-#include "error.h"
+#include "Error.h"
 #include <stdio.h>
 
-namespace ect {
+namespace MARTe {
 
 ExtendedError::ExtendedError(const int ec, const char *path, const int ln,
                              const char *msg)
     : Error(ec), file_(path), msg_(msg), line_(ln) {}
 
 ExtendedError::ExtendedError()
-    : Error(NO_ERROR), file_(""), msg_(""), line_(0){};
+    : Error(NO_ERROR), file_(""), msg_(""), line_(0) {};
 
 ExtendedError::ExtendedError(const ExtendedError &e)
     : Error(e.code()), file_(e.file_), msg_(e.msg_), line_(e.line_) {}
 
-ExtendedError::~ExtendedError() { msg_.clear(); }
+ExtendedError::~ExtendedError() {}
 
 char *ExtendedError::what() const {
-  char* msg = new char[256];
+  char *msg = new char[256];
   sprintf(msg, "Error %d found at %s:%d : `%s`\n", code(), file_, line_,
-          msg_.cstr());
+          msg_.Tail(0));
   return msg;
 }
 
 const char *ExtendedError::file() const { return file_; }
 
-const char *ExtendedError::msg() const { return msg_.cstr(); }
+const char *ExtendedError::msg() const { return msg_.Tail(0); }
 
 int ExtendedError::line() const { return line_; }
 
@@ -40,4 +40,4 @@ char *Error::what() const {
   sprintf(msg, "Error %d", code());
   return msg;
 }
-} // namespace ect
+} // namespace MARTe

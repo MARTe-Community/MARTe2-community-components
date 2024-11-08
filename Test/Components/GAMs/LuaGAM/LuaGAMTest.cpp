@@ -1,19 +1,19 @@
-#include "LuaGAMTest.h"
-#include "CompilerTypes.h"
+#include "Error.h"
 #include "FastMath.h"
+#include "Logging.h"
 #include "LuaGAM.h"
+#include "LuaGAMTest.h"
 #include "LuaParser.h"
+#include "TestMacros.h"
 #include "Utils.h"
 #include "dbutils.h"
-#include "ec-types/include/logging.h"
-#include "ec-types/test/macros.h"
 #include "lua.hpp"
-#include <cstring>
-#include <error.h>
 #include <execinfo.h>
+#include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 
-#define LOG(...) ect::log::info(__VA_ARGS__);
+#define LOG(...) log::info(__VA_ARGS__);
 
 #define DB_TEST "dbtest"
 
@@ -35,30 +35,30 @@ public:
   }
 };
 
-bool TestScanning(const char *code, const ect::Str expeted_tokens[],
+bool TestScanning(const char *code, const Str expeted_tokens[],
                   const uint32 len) {
   bool ok = true;
-  EC_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(ok);
   LUA::tokens_t toks;
   try {
     toks = LUA::scan(code, ok);
-  } catch (ect::Error &e) {
+  } catch (Error &e) {
     DEBUG_LOG("Test error:%s\n", e.what())
     ok = false;
   }
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_EQ(toks.len() - 1, len)
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_EQ(toks.len() - 1, len)
 
   for (MARTe::uint32 i = 0; i < toks.len() - 1; i++) {
-    EC_ASSERT_EQ(toks[i]->raw, expeted_tokens[i]);
+    T_ASSERT_EQ(toks[i]->raw, expeted_tokens[i]);
   }
   return ok;
 }
 
 #define SCANTEST(code_str, ...)                                                \
   const char *code = code_str;                                                 \
-  ect::Str tokens[] = {__VA_ARGS__};                                           \
-  uint32 len = sizeof(tokens) / sizeof(ect::Str);                              \
+  Str tokens[] = {__VA_ARGS__};                                                \
+  uint32 len = sizeof(tokens) / sizeof(Str);                                   \
   return TestScanning(code, tokens, len);
 
 bool LuaParserTest::TestParserInitialization() {
@@ -134,11 +134,11 @@ bool TestParse(const char *code) {
   LUA::ast_t ast;
   try {
     ast = LUA::parse(code, ok);
-  } catch (ect::Error &e) {
+  } catch (Error &e) {
     DEBUG_LOG("Test error:%s\n", e.what())
     ok = false;
   }
-  EC_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(ok);
   return ok;
 }
 
@@ -156,7 +156,7 @@ bool LuaParserTest::TestParserDoBlock() {
   const char *code2 = "do\n"
                       "  ;\n";
   LUA::parse(code2, ok);
-  EC_ASSERT_FALSE(ok);
+  T_ASSERT_FALSE(ok);
   return !ok;
 }
 
@@ -245,9 +245,9 @@ char *to_tag(FILE *f, const char *delim, bool &ok) {
   return str;
 }
 
-ect::List<ect::Str> tolines(ect::Str s) {
-  ect::List<ect::Str> lines;
-  ect::u32 i0 = 0;
+List<Str> tolines(Str s) {
+  List<Str> lines;
+  uint32 i0 = 0;
   for (uint32 i = 0; i < s.len(); i++) {
     if (s[i] == '\n') {
       lines.append(s.substr(i0, i));
@@ -260,16 +260,15 @@ ect::List<ect::Str> tolines(ect::Str s) {
   return lines;
 }
 
-ect::Str diff(const char *a, const char *b, uint32 tab = 0) {
+Str diff(const char *a, const char *b, uint32 tab = 0) {
   char *spaces = new char[tab * 4 + 1];
   memset(spaces, ' ', tab * 4);
   spaces[tab * 4] = 0;
-  ect::Str res;
-  ect::List<ect::Str> line_a = tolines(a);
-  ect::List<ect::Str> line_b = tolines(b);
+  Str res;
+  List<Str> line_a = tolines(a);
+  List<Str> line_b = tolines(b);
   uint32 line = 0;
-  for (ect::List<ect::Str>::iterator *it = line_a.iterate(); it;
-       it = it->next()) {
+  for (List<Str>::iterator *it = line_a.iterate(); it; it = it->next()) {
     line++;
     if (!line_b.contains(it->value())) {
       char num[10];
@@ -284,8 +283,7 @@ ect::Str diff(const char *a, const char *b, uint32 tab = 0) {
   div[(tab + 2) * 4] = '\n';
   div[(tab + 2) * 4 + 1] = 0;
   res = res + div;
-  for (ect::List<ect::Str>::iterator *it = line_b.iterate(); it;
-       it = it->next()) {
+  for (List<Str>::iterator *it = line_b.iterate(); it; it = it->next()) {
     line++;
     if (!line_a.contains(it->value())) {
       char num[10];
@@ -308,7 +306,7 @@ bool run_corpus_test(const uint32 test_i, const char *path, const char *desc,
     printf("  [\e[31mFAIL   \e[0m] to parser test %s[%d]: `%s`\n", path, test_i,
            desc);
   } else {
-    ect::Str ast_computed;
+    Str ast_computed;
     for (LUA::NodepList::iterator *it = ast_->iterate(); it; it = it->next()) {
       ast_computed = ast_computed + it->value()->toString(0, 4, true);
     }
@@ -327,7 +325,7 @@ bool run_corpus_test(const uint32 test_i, const char *path, const char *desc,
 
 bool test_corpus(const char *path) {
   FILE *f = fopen(path, "r");
-  EC_ASSERT_TRUE(f != null(FILE *));
+  T_ASSERT_TRUE(f != NULL_PTR(FILE *));
   char line[256];
   uint32 i = 0;
   uint32 len = 0;
@@ -339,20 +337,20 @@ bool test_corpus(const char *path) {
       char *desc = to_tag(f, "==== CODE ====", ok);
       if (!ok) {
         delete[] desc;
-        EC_LOG("Corpus: %s, test %d: failed to get description\n", path, i);
+        T_LOG("Corpus: %s, test %d: failed to get description\n", path, i);
         return false;
       }
       desc[strlen(desc) - 1] = 0;
       char *code = to_tag(f, "==== AST  ====", ok);
       if (!ok) {
-        EC_LOG("Corpus: %s, test %d `%s`: failed to get code\n", path, i, desc);
+        T_LOG("Corpus: %s, test %d `%s`: failed to get code\n", path, i, desc);
         delete[] desc;
         delete[] code;
         return false;
       }
       char *ast = to_tag(f, "==== DONE ====", ok);
       if (!ok) {
-        EC_LOG("Corpus: %s, test %d `%s`: failed to get ast\n", path, i, desc);
+        T_LOG("Corpus: %s, test %d `%s`: failed to get ast\n", path, i, desc);
         delete[] desc;
         delete[] code;
         delete[] ast;
@@ -372,8 +370,8 @@ bool test_corpus(const char *path) {
 
 bool LuaParserTest::TestParserExpressions() {
   try {
-    EC_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_exp.corpus"));
-  } catch (ect::ExtendedError &e) {
+    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_exp.corpus"));
+  } catch (ExtendedError &e) {
     printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
     return false;
   }
@@ -382,9 +380,8 @@ bool LuaParserTest::TestParserExpressions() {
 
 bool LuaParserTest::TestParserStatements() {
   try {
-    EC_ASSERT_TRUE(
-        test_corpus("./Test/Resources/LuaGAM/luaparser_stat.corpus"));
-  } catch (ect::ExtendedError &e) {
+    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_stat.corpus"));
+  } catch (ExtendedError &e) {
     printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
     return false;
   }
@@ -393,9 +390,8 @@ bool LuaParserTest::TestParserStatements() {
 
 bool LuaParserTest::TestParserDeclarations() {
   try {
-    EC_ASSERT_TRUE(
-        test_corpus("./Test/Resources/LuaGAM/luaparser_decl.corpus"));
-  } catch (ect::ExtendedError &e) {
+    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_decl.corpus"));
+  } catch (ExtendedError &e) {
     printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
     return false;
   }
@@ -404,9 +400,8 @@ bool LuaParserTest::TestParserDeclarations() {
 
 bool LuaParserTest::TestParserComments() {
   try {
-    EC_ASSERT_TRUE(
-        test_corpus("./Test/Resources/LuaGAM/luaparser_comm.corpus"));
-  } catch (ect::ExtendedError &e) {
+    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_comm.corpus"));
+  } catch (ExtendedError &e) {
     printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
     void *array[10];
     size_t size;
@@ -497,10 +492,10 @@ bool LuaGAMTest::TestEmptyInitialisation() {
   LuaFriend luagam;
   MARTe::ConfigurationDatabase db = MARTe::GAMDB::create();
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_FALSE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_FALSE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return true;
 }
 
@@ -512,12 +507,12 @@ bool LuaGAMTest::TestInitialisation() {
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.Setup());
-  EC_ASSERT_FALSE(luagam.IsCodeExternal());
-  EC_ASSERT_TRUE(luagam.CodePath().empty());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_FALSE(luagam.IsCodeExternal());
+  T_ASSERT_TRUE(luagam.CodePath().empty());
   return ok;
 }
 
@@ -528,12 +523,12 @@ bool LuaGAMTest::TestInitialisationWithCode() {
   char filepath[] = "file://./Test/Resources/LuaGAM/testfile.lua";
   MARTe::GAMDB::set_parameter(db, "Code", filepath);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.Setup());
-  EC_ASSERT_TRUE(luagam.IsCodeExternal());
-  EC_ASSERT_FALSE(luagam.CodePath().empty());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(luagam.IsCodeExternal());
+  T_ASSERT_FALSE(luagam.CodePath().empty());
   return ok;
 }
 
@@ -545,8 +540,8 @@ bool LuaGAMTest::TestWrongInitialisationWithCode() {
   remove(filepath);
   MARTe::GAMDB::set_parameter(db, "Code", filepath);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_FALSE(luagam.Initialise(db));
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_FALSE(luagam.Initialise(db));
   return ok;
 }
 
@@ -562,19 +557,19 @@ bool LuaGAMTest::TestSameSignalName() {
   MARTe::GAMDB::add_input(db, "X", "float32", "DDB1");
   MARTe::GAMDB::add_output(db, "X", "float32", "DDB1");
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
 bool addInternalState(MARTe::ConfigurationDatabase &db, const char *name,
                       const char *value) {
   bool ok = true;
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(db.MoveAbsolute("InternalStates"));
-  EC_ASSERT_TRUE(db.Write(name, value));
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(db.MoveAbsolute("InternalStates"));
+  T_ASSERT_TRUE(db.Write(name, value));
   db.MoveToRoot();
   return ok;
 }
@@ -596,16 +591,16 @@ bool LuaGAMTest::TestInternals() {
   MARTe::ConfigurationDatabase db = MARTe::GAMDB::create();
   const char *code = "function GAM() glob1=glob2 end";
   MARTe::GAMDB::set_parameter(db, "Code", code);
-  EC_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
-  EC_ASSERT_TRUE(addInternalState(db, "glob1", "1.5"));
-  EC_ASSERT_TRUE(addInternalState(db, "glob2", "1"));
+  T_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
+  T_ASSERT_TRUE(addInternalState(db, "glob1", "1.5"));
+  T_ASSERT_TRUE(addInternalState(db, "glob2", "1"));
   db.MoveToRoot();
   // printInternalStates(db);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.Setup());
   return ok;
 }
 
@@ -616,15 +611,15 @@ bool LuaGAMTest::TestWrongInternals() {
   const char *code = "function GAM()\n"
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
-  EC_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
-  EC_ASSERT_TRUE(addInternalState(db, "glob1", "1a"));
+  T_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
+  T_ASSERT_TRUE(addInternalState(db, "glob1", "1a"));
   db.MoveToRoot();
   // printInternalStates(db);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_FALSE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_FALSE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -639,10 +634,10 @@ bool LuaGAMTest::TestInitMissingGAM() {
   MARTe::GAMDB::add_input(db, "x", "float32", DB_TEST);
   MARTe::GAMDB::add_output(db, "y", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_FALSE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_FALSE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -657,10 +652,10 @@ bool LuaGAMTest::TestInitReassignVar() {
   MARTe::GAMDB::add_input(db, "x", "float32", DB_TEST);
   MARTe::GAMDB::add_output(db, "y", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -677,10 +672,10 @@ bool LuaGAMTest::TestInitUnusedSignal() {
   MARTe::GAMDB::add_output(db, "y", "float32", DB_TEST);
   MARTe::GAMDB::add_output(db, "z", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -696,10 +691,10 @@ bool LuaGAMTest::TestInitOutputUsedBeforeAssignment() {
   MARTe::GAMDB::add_output(db, "x", "float32", DB_TEST);
   MARTe::GAMDB::add_output(db, "y", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.Setup());
   return ok;
 }
 
@@ -713,10 +708,10 @@ bool LuaGAMTest::TestInitMissingSignal() {
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::GAMDB::add_input(db, "x", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.Setup()); // TODO: check for global unused var
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.Setup()); // TODO: check for global unused var
   return ok;
 }
 
@@ -731,10 +726,10 @@ bool LuaGAMTest::TestInitCodeWithExtraCode() {
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::GAMDB::add_input(db, "x", "float32", DB_TEST);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -750,12 +745,12 @@ bool LuaGAMTest::TestExecution() {
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::int32 *x = (MARTe::int32 *)luagam.input_pointer(0);
   MARTe::int32 *y = (MARTe::int32 *)luagam.input_pointer(1);
   MARTe::int32 *z = (MARTe::int32 *)luagam.output_pointer(0);
@@ -765,10 +760,10 @@ bool LuaGAMTest::TestExecution() {
   MARTe::uint64 duration = utils::utime();
   for (int i = 0; i < N; i++) {
     *x = i;
-    EC_ASSERT_TRUE(luagam.Execute());
-    EC_ASSERT_EQ(z[0], y[0] + 1);
-    EC_ASSERT_EQ(z[1], *x - 1);
-    EC_ASSERT_EQ(z[2], y[1] * 2);
+    T_ASSERT_TRUE(luagam.Execute());
+    T_ASSERT_EQ(z[0], y[0] + 1);
+    T_ASSERT_EQ(z[1], *x - 1);
+    T_ASSERT_EQ(z[2], y[1] * 2);
   }
   duration = utils::utime() - duration;
   LOG("Total time %llu us\n", duration);
@@ -787,12 +782,12 @@ bool LuaGAMTest::TestExecOutOfBound() {
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::int32 *x = (MARTe::int32 *)luagam.input_pointer(0);
   MARTe::uint8 *y = (MARTe::uint8 *)luagam.output_pointer(0);
   const int N_TEST = 6;
@@ -801,10 +796,10 @@ bool LuaGAMTest::TestExecOutOfBound() {
     *x = vals[i];
     int exp = vals[i] + 1;
     if (exp >= 0 && exp < 256) {
-      EC_ASSERT_TRUE(luagam.Execute());
-      EC_ASSERT_EQ(*y, (MARTe::uint8)exp);
+      T_ASSERT_TRUE(luagam.Execute());
+      T_ASSERT_EQ(*y, (MARTe::uint8)exp);
     } else {
-      EC_ASSERT_FALSE(luagam.Execute());
+      T_ASSERT_FALSE(luagam.Execute());
     }
   }
   return ok;
@@ -824,12 +819,12 @@ bool LuaGAMTest::TestExecWriteInput() {
                       "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code_);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_FALSE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_FALSE(luagam.Setup());
   return ok;
 }
 
@@ -849,27 +844,27 @@ bool LuaGAMTest::TestExecReadOutput() {
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::int32 *x = (MARTe::int32 *)luagam.input_pointer(0);
   MARTe::int32 *y = (MARTe::int32 *)luagam.output_pointer(0);
   int val = 10;
   *x = val;
   // LOG("y before gam %d\n", *y);
-  EC_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_TRUE(luagam.Execute());
   // LOG("x set into gam %d\n", *x);
   // LOG("y after gam %d\n", *y);
-  EC_ASSERT_EQ(*y, -val);
+  T_ASSERT_EQ(*y, -val);
   *x = -2;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, -*x);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, -*x);
   *x = 10;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, *x);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, *x);
   return ok;
 }
 
@@ -884,18 +879,18 @@ bool LuaGAMTest::TestExecMath() {
                      "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::float32 *x = (MARTe::float32 *)luagam.input_pointer(0);
   MARTe::float32 *y = (MARTe::float32 *)luagam.output_pointer(0);
   for (int i = 0; i < 100; i++) {
     *x = i / 5.0;
-    EC_ASSERT_TRUE(luagam.Execute());
-    EC_ASSERT_NEAR(*y, FastMath::Cos(*x * 2 * FastMath::PI), 1e-4);
+    T_ASSERT_TRUE(luagam.Execute());
+    T_ASSERT_NEAR(*y, FastMath::Cos(*x * 2 * FastMath::PI), 1e-4);
   }
   return ok;
 }
@@ -914,37 +909,37 @@ template <typename T> bool testIntegerType(const char *name, T t_min, T t_max) {
 
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::int64 *x = (MARTe::int64 *)luagam.input_pointer(0);
   T *y = (T *)luagam.output_pointer(0);
   *x = 0;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, 0);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, 0);
 
   *x = (integer_max + integer_min) / 2 + 1;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, (T)((integer_min + integer_max) / 2 + 1));
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, (T)((integer_min + integer_max) / 2 + 1));
 
   *x = integer_max;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, (T)integer_max);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, (T)integer_max);
 
   *x = integer_min;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, (T)integer_min);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, (T)integer_min);
 
   if (integer_min > LUA_MAX_INTEGER) {
     *x = integer_min - 1;
-    EC_ASSERT_FALSE(luagam.Execute());
+    T_ASSERT_FALSE(luagam.Execute());
   }
   if (integer_max < -LUA_MAX_INTEGER) {
     *x = integer_max + 1;
-    EC_ASSERT_FALSE(luagam.Execute());
+    T_ASSERT_FALSE(luagam.Execute());
   }
   return ok;
 }
@@ -961,12 +956,12 @@ template <typename T> bool testFloatType(const char *name) {
 
   MARTe::GAMDB::set_parameter(db, "Code", code);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   double *x = (double *)luagam.input_pointer(0);
   T *y = (T *)luagam.output_pointer(0);
   const int N = 8;
@@ -975,7 +970,7 @@ template <typename T> bool testFloatType(const char *name) {
   };
   for (int i = 0; i < N; i++) {
     *x = vals[i];
-    EC_ASSERT_TRUE(luagam.Execute());
+    T_ASSERT_TRUE(luagam.Execute());
     if (fabs((*y - vals[i]) / vals[i]) > 1e-3) {
       LOG("Failed %d: %f != %f\n", i, *y, vals[i]);
       return false;
@@ -1007,9 +1002,9 @@ bool LuaGAMTest::TestExecTypes() {
 bool addAuxiliaryFunction(MARTe::ConfigurationDatabase &db, const char *name,
                           const char *function) {
   bool ok = true;
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(db.MoveAbsolute("AuxiliaryFunctions"));
-  EC_ASSERT_TRUE(db.Write(name, function));
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(db.MoveAbsolute("AuxiliaryFunctions"));
+  T_ASSERT_TRUE(db.Write(name, function));
   db.MoveToRoot();
   return ok;
 }
@@ -1027,24 +1022,24 @@ bool LuaGAMTest::TestExecWithAuxiliaries() {
   const char *auxiliary_code = "function helper(input)\n"
                                "  return math.cos(input)\n"
                                "end\n";
-  EC_ASSERT_TRUE(db.CreateRelative("AuxiliaryFunctions"));
+  T_ASSERT_TRUE(db.CreateRelative("AuxiliaryFunctions"));
   db.MoveRelative("AuxiliaryFunctions");
-  EC_ASSERT_TRUE(addAuxiliaryFunction(db, "helper", auxiliary_code));
+  T_ASSERT_TRUE(addAuxiliaryFunction(db, "helper", auxiliary_code));
   db.MoveToAncestor(1u);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
   MARTe::float64 *x = (MARTe::float64 *)luagam.input_pointer(0);
   MARTe::float64 *y = (MARTe::float64 *)luagam.output_pointer(0);
   *x = 0;
   LOG("x:%f\n", *x)
   LOG("y:%f\n", *y)
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(*y, 1);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(*y, 1);
   LOG("x:%f\n", *x)
   LOG("y:%f\n", *y)
   return ok;
@@ -1062,14 +1057,14 @@ bool LuaGAMTest::TestExecWrongAuxiliaries() {
   MARTe::GAMDB::set_parameter(db, "Code", code);
   const char *auxiliary_code = "function help(input)\n"
                                "  return test(input)\n";
-  EC_ASSERT_TRUE(db.CreateAbsolute("AuxiliaryFunctions"));
-  EC_ASSERT_TRUE(addAuxiliaryFunction(db, "help", auxiliary_code));
+  T_ASSERT_TRUE(db.CreateAbsolute("AuxiliaryFunctions"));
+  T_ASSERT_TRUE(addAuxiliaryFunction(db, "help", auxiliary_code));
   db.MoveToRoot();
   LUA::parse(auxiliary_code, ok);
-  EC_ASSERT_FALSE(ok);
+  T_ASSERT_FALSE(ok);
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_FALSE(luagam.Initialise(db));
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_FALSE(luagam.Initialise(db));
   return ok;
 }
 
@@ -1087,15 +1082,15 @@ bool LuaGAMTest::TestSimulatorGAM() {
   MARTe::GAMDB::add_output(db, "State", "uint8", DB_TEST);
   MARTe::GAMDB::add_output(db, "Ramp_done", "uint8", DB_TEST);
   MARTe::GAMDB::add_output(db, "Current", "float32", DB_TEST);
-  EC_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
+  T_ASSERT_TRUE(db.CreateAbsolute("InternalStates"));
   addInternalState(db, "last_time", "0");
   MARTe::ConfigurationDatabase cdb = MARTe::GAMDB::make_cdb(db, ok);
-  EC_ASSERT_TRUE(ok);
-  EC_ASSERT_TRUE(luagam.Initialise(db));
-  EC_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
-  EC_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
-  EC_ASSERT_TRUE(luagam.Setup());
+  T_ASSERT_TRUE(ok);
+  T_ASSERT_TRUE(luagam.Initialise(db));
+  T_ASSERT_TRUE(luagam.SetConfiguredDatabase(cdb));
+  T_ASSERT_TRUE(luagam.AllocateInputSignalsMemory());
+  T_ASSERT_TRUE(luagam.AllocateOutputSignalsMemory());
+  T_ASSERT_TRUE(luagam.Setup());
 
   uint8 &ramp_cmd = *(uint8 *)luagam.input_pointer(0);
   uint8 &hold_cmd = *(uint8 *)luagam.input_pointer(1);
@@ -1105,17 +1100,17 @@ bool LuaGAMTest::TestSimulatorGAM() {
   uint8 &ramp_done = *(uint8 *)luagam.output_pointer(1);
   current_sp = 0.1;
   sweep_rate = 50000.0;
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(state, 0u);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(state, 0u);
   ramp_cmd = 1u;
-  EC_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_TRUE(luagam.Execute());
   ramp_cmd = 0u;
-  EC_ASSERT_EQ(state, 1u);
+  T_ASSERT_EQ(state, 1u);
   usleep(1000);
 
-  EC_ASSERT_TRUE(luagam.Execute());
-  EC_ASSERT_EQ(state, 3u);
-  EC_ASSERT_EQ(ramp_done, 1u);
+  T_ASSERT_TRUE(luagam.Execute());
+  T_ASSERT_EQ(state, 3u);
+  T_ASSERT_EQ(ramp_done, 1u);
   // MARTe::float32 *x = (MARTe::float32 *)luagam.input_pointer(0);
   // MARTe::float32 *y = (MARTe::float32 *)luagam.output_pointer(0);
   return ok;

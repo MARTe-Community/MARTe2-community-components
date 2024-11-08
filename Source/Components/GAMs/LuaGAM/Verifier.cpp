@@ -138,7 +138,7 @@ bool LuaGAMValidator::validate_output_signal(const char8 *name,
   return ok;
 }
 
-const ect::Str &var_name(NodepList::iterator *it) {
+const Str &var_name(NodepList::iterator *it) {
   return it->value()->sub_nodes[0]->tok->raw;
 }
 

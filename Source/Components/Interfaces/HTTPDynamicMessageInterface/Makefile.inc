@@ -23,11 +23,11 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
-OBJSX= HttpDynamicMessageInterface.x
+OBJSX= HTTPDynamicMessageInterface.x
 
-PACKAGE=Core
+PACKAGE=Components/Interfaces
 
-ROOT_DIR=../../..
+ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
@@ -49,11 +49,11 @@ INCLUDES += -I$(MARTe2_DIR)/Source/Core/Scheduler/L5GAMs
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L1Portability
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L3Streams
 INCLUDES += -I$(MARTe2_DIR)/Source/Core/FileSystem/L4HttpService
-INCLUDES += -I$(ROOT_DIR)/Source/Utils/Helpers
+INCLUDES += -I$(ROOT_DIR)/Source/Core/Helpers
 
 all: $(OBJS) $(SUBPROJ) \
-	$(BUILD_DIR)/HttpDynamicMessageInterface$(LIBEXT) \
-	$(BUILD_DIR)/HttpDynamicMessageInterface$(DLLEXT)
+	$(BUILD_DIR)/HTTPDynamicMessageInterface$(LIBEXT) \
+	$(BUILD_DIR)/HTTPDynamicMessageInterface$(DLLEXT)
 	    echo  $(OBJS)
 
 include $(MAKEDEFAULTDIR)/MakeStdLibRules.$(TARGET)

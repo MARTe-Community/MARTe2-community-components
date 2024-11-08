@@ -4,15 +4,15 @@
 #include "HttpChunkedStream.h"
 #include "HttpClient.h"
 #include "HttpDefinition.h"
-#include "HttpDynamicMessageInterface.h"
+#include "HTTPDynamicMessageInterface.h"
 #include "HttpProtocol.h"
 #include "HttpService.h"
 #include "ObjectRegistryDatabase.h"
 #include "RegisteredMethodsMessageFilter.h"
 #include "StandardParser.h"
 #include "StreamString.h"
-#include "ec-types/include/logging.h"
-#include "ec-types/test/macros.h"
+#include "Logging.h"
+#include "TestMacros.h"
 
 /*---------------------------------------------------------------------------*/
 class HttpMessageInterfaceTestObject : public MARTe::Object,
@@ -51,22 +51,22 @@ CLASS_METHOD_REGISTER(HttpMessageInterfaceTestObject, ReceiverMethod)
 
 bool MessageInterfaceTester::TestInit() {
   bool ok = true;
-  MARTe::HttpDynamicMessageInterface messageInterface;
+  MARTe::HTTPDynamicMessageInterface messageInterface;
   MARTe::ConfigurationDatabase cdb;
-  EC_ASSERT_TRUE(messageInterface.Initialise(cdb));
+  T_ASSERT_TRUE(messageInterface.Initialise(cdb));
   return ok;
 }
 
 bool MessageInterfaceTester::TestEmptyMessage() {
   bool ok = true;
-  MARTe::HttpDynamicMessageInterface messageInterface;
+  MARTe::HTTPDynamicMessageInterface messageInterface;
   MARTe::ConfigurationDatabase cdb;
-  EC_ASSERT_TRUE(messageInterface.Initialise(cdb));
+  T_ASSERT_TRUE(messageInterface.Initialise(cdb));
   MARTe::HttpChunkedStream stream;
   MARTe::HttpProtocol protocol(stream);
 
   MARTe::StreamString str;
-  EC_ASSERT_FALSE(messageInterface.GetAsText(str, protocol));
+  T_ASSERT_FALSE(messageInterface.GetAsText(str, protocol));
 
   return ok;
 }
@@ -74,7 +74,7 @@ bool MessageInterfaceTester::TestEmptyMessage() {
 #define ASSERT_AND_PURGE(x)                                                    \
   {                                                                            \
     if (!(x)) {                                                                \
-      ect::log::error("Condition `" #x "` at " __FILE__ ":%d is not true\n",   \
+      log::error("Condition `" #x "` at " __FILE__ ":%d is not true\n",   \
                       __LINE__);                                               \
       ObjectRegistryDatabase::Instance()->Purge();                             \
       return false;                                                            \

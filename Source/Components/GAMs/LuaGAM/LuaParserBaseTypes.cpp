@@ -104,9 +104,9 @@ Token::Token(char8 *str, uint32 len, uint32 row, uint32 col)
 
 Token::~Token() {}
 
-ect::Str Token::toString(bool show_type, bool show_val) {
+Str Token::toString(bool show_type, bool show_val) {
   char buff[1024];
-  ect::Str s;
+  Str s;
   if (show_type) {
     sprintf(buff, "tok:%s", lua_syntax_element_names[type]);
     s = s + buff;
@@ -123,7 +123,7 @@ ect::Str Token::toString(bool show_type, bool show_val) {
 
 void tokens_t::add(Tokenp t) { toks.append(t); }
 
-void tokens_t::add(ect::Str t, uint32 row, uint32 col) {
+void tokens_t::add(Str t, uint32 row, uint32 col) {
   toks.append(new Token(t.cstr(), t.len(), row, col));
 }
 
@@ -135,17 +135,17 @@ void tokens_t::add(char8 *t, uint32 row, uint32 col, uint32 len) {
   toks.append(new Token(t, len, row, col));
 }
 
-void tokens_t::add_long_bracket_token(charList code_lines, uint32 &line_index,
+void tokens_t::add_long_bracket_token(strList code_lines, uint32 &line_index,
                                       uint32 &line_pos, uint32 &char_pos,
                                       bool is_string, bool &ok) {
   uint32 len_token = 0;
   uint32 add_tok_len = 1;
-  ect::Str line = code_lines[line_index];
+  Str line = code_lines[line_index];
   if (!is_string) {
     add_tok_len = 3;
   }
-  ect::Str closing_long_bracket = "]";
-  ect::Str long_token = "";
+  Str closing_long_bracket = "]";
+  Str long_token = "";
   uint32 long_bracket_level = 0;
   while (ok) {
     if (line[line_pos + char_pos + long_bracket_level + add_tok_len] == '=') {
@@ -160,7 +160,7 @@ void tokens_t::add_long_bracket_token(charList code_lines, uint32 &line_index,
     }
   }
   if (ok) {
-    ect::Str line_str = line;
+    Str line_str = line;
     uint32 init_line_index = line_index;
     int32 end_index = line_str.find(closing_long_bracket);
     if (end_index < 0 && line_index + 1 < code_lines.len()) {
@@ -223,13 +223,13 @@ void Node::append(Tokenp tok_, LuaNode type_) {
   }
 }
 
-ect::Str Node::toString(uint32 level, uint32 indent_level, bool show_val) {
+Str Node::toString(uint32 level, uint32 indent_level, bool show_val) {
   char *indent = new char[level * indent_level + 1];
   memset(indent, ' ', level * indent_level);
   indent[level * indent_level] = 0;
   char buff[1024];
   sprintf(buff, "%s(%s", indent, lua_node_names[type]);
-  ect::Str s = buff;
+  Str s = buff;
   if (!tok.isNull()) {
     sprintf(buff, " tok:%s", lua_syntax_element_names[tok->type]);
     s = s + buff;

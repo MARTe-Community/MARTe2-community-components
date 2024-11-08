@@ -27,7 +27,7 @@
 #If SPB is directly exported as an environment variable it will also be evaluated as part of the subprojects SPB, thus
 #potentially overriding its value
 #Main target subprojects. May be overridden by shell definition.
-SPBM?=Source/Components/Utils.x Source/Components/DataSources.x \
+SPBM?=Source/Core.x Source/Components/DataSources.x \
 	Source/Components/GAMs.x \
 	Source/Components/Interfaces.x
 
@@ -38,8 +38,8 @@ SPBM?=Source/Components/Utils.x Source/Components/DataSources.x \
 # 	Test/Components/Interfaces.x \
 #         Test/GTest.x
 SPBMT?=Test/Components/GAMs.x \
-	Test/Components/Utils.x \
 	Test/Components/Interfaces.x \
+	Test/Testing/Utils.x \
   Test/GTest.x
 
 GAM?=Source/Components/GAMs.x
@@ -58,7 +58,7 @@ ROOT_DIR=.
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 
-all: $(OBJS) core test http
+all: $(OBJS) core test
 	echo  $(OBJS)
 
 core: $(SUBPROJMAIN) check-env

@@ -1,5 +1,5 @@
-#ifndef _RESULT_H__
-#define _RESULT_H__
+#ifndef RESULT_H__
+#define RESULT_H__
 #include "Error.h"
 #include <assert.h>
 

@@ -2,7 +2,6 @@
 #define _LUAGAM_VERIFIER_H__
 
 #include "AST.h"
-#include "Architecture/x86_gcc/CompilerTypes.h"
 #include "LuaParserBaseTypes.h"
 
 #define GAM_FN "GAM"

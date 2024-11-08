@@ -1,18 +1,18 @@
-#ifndef _OPTION_H__
-#define _OPTION_H__
+#ifndef OPTION_H__
+#define OPTION_H__
 #include "CompilerTypes.h"
 #include <assert.h>
 
 namespace MARTe {
 
 /**
-  @brief Optional<T> class is a container used for
+  @brief Option<T> class is a container used for
   when an operation can return a null value.
 
-  If an operation can result in a `NULL` using Optional<T> should
+  If an operation can result in a `NULL` using Option<T> should
   be safer.
-  It is then possible to return the value by returning `Optional(VALUE)` or
-  the empty `Optional()`.
+  It is then possible to return the value by returning `Option(VALUE)` or
+  the empty `Option()`.
 
   It is possible to check if the optional is empty or not with the `empty()`
   method or casting it to `bool` but in this case is the opposite. To access the

@@ -36,9 +36,6 @@ MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
-export INCLUDES = -I$(ABS_ROOT_DIR)/Source/Components/Utils/Helpers
-export LIBRARIES = -L$(ABS_ROOT_DIR)/Build/$(TARGET)/Components/Utils/Helpers -lHelpers
-
 all: $(OBJS)  $(SUBPROJ)
 	echo  $(OBJS)
 

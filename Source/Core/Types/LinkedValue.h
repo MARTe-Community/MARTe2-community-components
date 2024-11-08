@@ -1,9 +1,9 @@
-#ifndef _EC_LINKED_H__
-#define _EC_LINKED_H__
+#ifndef LINKED_H__
+#define LINKED_H__
 
-#include "basetypes.h"
+#include "CompilerTypes.h"
 
-namespace ect {
+namespace MARTe {
 /**
   @brief class conteiner representing a linked value, that can be
   read or write to a specific address.
@@ -22,13 +22,13 @@ public:
     @param val initial value
     @param pointer pointer to the linked register
   **/
-  inline linked(const T val, T *pointer = null(T *))
+  inline linked(const T val, T *pointer = NULL_PTR(T *))
       : value_(val), pointer_(pointer) {}
 
   /**
     @brief empty linked value constructor
   **/
-  inline linked() : value_(), pointer_(null(T *)) {}
+  inline linked() : value_(), pointer_(NULL_PTR(T *)) {}
 
   /**
     @brief assign operator
@@ -72,14 +72,14 @@ public:
     @return true if the pointer is assinged
     @return false otherwise
   **/
-  inline bool isLinked() const { return pointer_ != null(T *); }
+  inline bool isLinked() const { return pointer_ != NULL_PTR(T *); }
 
   /**
     @brief write (copy) the value stored to the actual register
     @return itself
   **/
   inline linked &write() {
-    if (pointer_ != null(T *)) {
+    if (pointer_ != NULL_PTR(T *)) {
       *pointer_ = value_;
     }
     return *this;
@@ -91,7 +91,7 @@ public:
     @return itself
   **/
   inline linked &read() {
-    if (pointer_ != null(T *)) {
+    if (pointer_ != NULL_PTR(T *)) {
       value_ = *pointer_;
     }
     return *this;
