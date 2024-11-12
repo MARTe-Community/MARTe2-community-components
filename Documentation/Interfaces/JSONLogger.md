@@ -66,10 +66,10 @@ To visualize and analyse the output log it is possible to use one of the many to
 
 ### lnav
 
-In particular there is integration to `lnav` in form of a `lnav` format [configuration](../../Tools/marte_jsonlog.json). To install it:
+In particular there is integration to `lnav` in form of a `lnav` format [configuration](../../Resources/marte_jsonlog.json). To install it:
 
 ```bash
-lnav -i Tools/marte_jsonlog.json
+lnav -i Resources/marte_jsonlog.json
 ```
 
 Then to visaulize a log simply:
