@@ -1,0 +1,81 @@
+{
+    "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+    "marte_json_log": {
+        "title": "MARTe JSON Log",
+        "description": "MARTe application logs",
+        "url": "https://git.iter.org/projects/EC/repos/ec-components",
+        "json": true,
+        "hide-extra": true,
+        "ordered-by-time": false,
+        "level-field": "error_type",
+        "level": {
+            "debug": "Debug",
+            "info": "Information",
+            "warning": "Warning",
+            "error": "Error"
+        },
+        "line-format": [
+            {
+                "field": "error_type",
+                "auto-width": true
+            },
+            " ",
+            {
+                "prefix": "[",
+                "field": "__timestamp__",
+                "suffix": "]"
+            },
+            " ",
+            {
+              "prefix": "(",
+              "field": "hr_time",
+              "suffix": ")"
+            },
+            " ",
+            {
+                "field": "session_id"
+            },
+            " ",
+            {
+                "field": "file_name"
+            },
+            ":",
+            {
+                "field": "line_number"
+            },
+            " \"",
+            {
+                "field": "message"
+            },
+            "\""
+        ],
+        "timestamp-field": "timestamp",
+        "opid-field": "session_id",
+        "value": {
+            "session_id": {
+                "kind": "string",
+                "identifier": true
+            },
+            "message": {
+                "kind": "string"
+            },
+            "file_name": {
+                "kind": "string",
+                "identifier": true
+            },
+            "line_number": {
+                "kind": "integer",
+                "identifier": true
+            },
+            "hr_time": {
+                "kind": "integer"
+            },
+            "message": {
+                "kind": "string"
+            },
+            "error_type": {
+                "kind": "string"
+            }
+        }
+    }
+}
