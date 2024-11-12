@@ -128,7 +128,7 @@ public:
     @return NO_ERROR error if scucceded.
   **/
   inline const E operator-() const {
-    assert(!ok_ && res_ != NULL_PTR(void *));
+    assert(!ok_);
     return *(E *)res_;
   }
 
