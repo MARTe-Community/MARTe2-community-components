@@ -23,7 +23,7 @@
 
 ### Types
 
-- [`Types`](/Documentation/Core/Types/Readme.md): a set of advanced types used in different components
+- [`Types`](/Documentation/Core/Types/README.md): a set of advanced types used in different components
 
 ## Instruction
 
