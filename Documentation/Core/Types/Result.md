@@ -20,8 +20,9 @@ to propagate the result information.
 
 1. `static Result Result::Succ(const T &val)` create a successful result with value `val`
 2. `static Result Result::Fail(const E &e)` create a fail result with error payload `e`
-3. `Result(const Result &other)` copy constructor
-4. `~Result()` dereferenciate the result and clean the memory if the counter reach 0
+3. `Result(const T &value)` successfull constructor
+4. `Result(const Result &other)` copy constructor
+5. `~Result()` dereferenciate the result and clean the memory if the counter reach 0
 
 ### Getters
 
@@ -31,3 +32,9 @@ to propagate the result information.
 4. `bool succeded() const` check if the result was a success
 
 
+### Operators
+
+ 1. `bool operator!() const` return true if failed, false otherwise
+ 2. `T operator+() const` return the value if succeded, die otherwise
+ 3. `E operator-() const` return the error if failed, die otherwise
+ 4. `Result & operator=(const Result &other)` assignement operator
