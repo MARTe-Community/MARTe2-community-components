@@ -15,9 +15,15 @@
 - [`JSONLogger`](Documentation/Interfaces/JSONLogger.md): a logger that output `jsonl` files that can be used in combination of many standard tools
 - [`HTTPDynamicMessageInterface`](Documentation/Interfaces/HttpDynamicMessageInterface.md): http dynamic message interface
 
+## Core
+
 ### Utils
 
-- [`Helpers.h`](Documentation/Utils/Helpers.md): contains functions and types to help the definition of new components
+- [`Helpers.h`](Documentation/Core/Utils/Helpers.md): contains functions and types to help the definition of new components
+
+### Types
+
+- [`Types`](/Documentation/Core/Types/Readme.md): a set of advanced types used in different components
 
 ## Instruction
 
@@ -31,7 +37,3 @@ Before compiling the following environment variables are needed:
 - `GTEST_DIR`: root path of `GTEST` library
 
 To compile simply type `make -f Makefile.gcc all`
-
-You can use the `Startup/Main.sh` script to execute a MARTe app
-please ensure that `MARTe2-components` is also installed in order to be
-properly able to load a complete MARTe configuration.
