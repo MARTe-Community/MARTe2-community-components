@@ -1,5 +1,6 @@
 #include "AST.h"
 #include "AdvancedErrorManagement.h"
+#include "LuaParserBaseTypes.h"
 #include <stdio.h>
 
 /*********************/
@@ -21,7 +22,7 @@ namespace Rules {
  * @param[out] ok control flag reference for correct node building
  * @return Block node
  */
-Nodep block(tokens_t::iterator *&tok_it, bool &ok);
+Nodep block(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build statement noe
@@ -29,7 +30,7 @@ Nodep block(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Statement node
  */
-Nodep stat(tokens_t::iterator *&tok_it, bool &ok);
+Nodep stat(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build attribute namelist
@@ -37,7 +38,7 @@ Nodep stat(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Atribute name list node
  */
-Nodep attnamelist(tokens_t::iterator *&tok_it, bool &ok);
+Nodep attnamelist(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build return statement node
@@ -45,7 +46,7 @@ Nodep attnamelist(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Return statement node
  */
-Nodep retstat(tokens_t::iterator *&tok_it, bool &ok);
+Nodep retstat(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build function name
@@ -53,7 +54,7 @@ Nodep retstat(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Functionbody node
  */
-Nodep funcname(tokens_t::iterator *&tok_it, bool &ok);
+Nodep funcname(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build variable list
@@ -61,7 +62,7 @@ Nodep funcname(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Variable list node
  */
-Nodep varlist(tokens_t::iterator *&tok_it, bool &ok);
+Nodep varlist(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build variable or function call
@@ -71,7 +72,7 @@ Nodep varlist(tokens_t::iterator *&tok_it, bool &ok);
  * FUNCTIONCALL)
  * @return Variable/functioncall node
  */
-Nodep var_or_funcall(tokens_t::iterator *&tok_it, bool &ok, LuaNode expected);
+Nodep var_or_funcall(Rc<TokenpList::iterator> &tok_it, bool &ok, LuaNode expected);
 
 /**
  * @brief Build name list
@@ -79,7 +80,7 @@ Nodep var_or_funcall(tokens_t::iterator *&tok_it, bool &ok, LuaNode expected);
  * @param[out] ok control flag reference for correct node building
  * @return Name list node
  */
-Nodep namelist(tokens_t::iterator *&tok_it, bool &ok);
+Nodep namelist(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build expression list
@@ -87,7 +88,7 @@ Nodep namelist(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Expression list list node
  */
-Nodep explist(tokens_t::iterator *&tok_it, bool &ok);
+Nodep explist(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build expression
@@ -95,7 +96,7 @@ Nodep explist(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Expression node
  */
-Nodep exp(tokens_t::iterator *&tok_it, bool &ok);
+Nodep exp(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build prefixed expression
@@ -103,7 +104,7 @@ Nodep exp(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Prefixed expression node
  */
-Nodep prefixexp(tokens_t::iterator *&tok_it, bool &ok);
+Nodep prefixexp(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build arguments
@@ -111,7 +112,7 @@ Nodep prefixexp(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Arguments node
  */
-Nodep args(tokens_t::iterator *&tok_it, bool &ok);
+Nodep args(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build functionbody
@@ -119,7 +120,7 @@ Nodep args(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Function body node
  */
-Nodep funcbody(tokens_t::iterator *&tok_it, bool &ok);
+Nodep funcbody(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build parameter list
@@ -127,7 +128,7 @@ Nodep funcbody(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Parameter list node
  */
-Nodep parlist(tokens_t::iterator *&tok_it, bool &ok);
+Nodep parlist(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build table constructor
@@ -135,7 +136,7 @@ Nodep parlist(tokens_t::iterator *&tok_it, bool &ok);
  * @param[out] ok control flag reference for correct node building
  * @return Table constructor node
  */
-Nodep table(tokens_t::iterator *&tok_it, bool &ok);
+Nodep table(Rc<TokenpList::iterator> &tok_it, bool &ok);
 
 /**
  * @brief Build generic Node instance
@@ -143,7 +144,7 @@ Nodep table(tokens_t::iterator *&tok_it, bool &ok);
  * @param[in] type LuaNode value
  * @return Node instance of declared type
  */
-Nodep node(tokens_t::iterator *&tok_it, LuaNode type);
+Nodep node(Rc<TokenpList::iterator> &tok_it, LuaNode type);
 } // namespace Rules
 } // namespace LUA
 } // namespace MARTe
@@ -167,7 +168,7 @@ NodepList *ast_t::operator->() { return &nodes; }
 Nodep &ast_t::operator[](const uint32 &ind) const { return nodes[ind]; }
 
 void ast_t::print() {
-  for (NodepList::iterator *it = nodes.iterate(); it; it = it->next()) {
+  for (Rc<NodepList::iterator> it = nodes.iterate(); it; it = it->next()) {
     printf("%s\n", it->value()->toString(0, 4, true).cstr());
   }
 }
@@ -175,7 +176,7 @@ void ast_t::print() {
 ast_t generate_ast(tokens_t tokens, bool &ok) {
   uint32 token_i = 0;
   ast_t ast;
-  tokens_t::iterator *tok_it = tokens->iterate();
+  Rc<TokenpList::iterator> tok_it = tokens->iterate();
   while (tok_it && tok_it->value()->type != ENDCODE && ok) {
     ast += Rules::block(tok_it, ok);
   }
@@ -183,7 +184,7 @@ ast_t generate_ast(tokens_t tokens, bool &ok) {
   return ast;
 }
 
-Nodep Rules::block(tokens_t::iterator *&tok_it, bool &ok) {
+Nodep Rules::block(Rc<TokenpList::iterator> &tok_it, bool &ok) {
   Nodep block = new Node(BLOCK);
   while (tok_it && tok_it->value()->type != RETURN &&
          tok_it->value()->type != ENDCODE && tok_it->value()->type != END &&
@@ -202,7 +203,7 @@ Nodep Rules::block(tokens_t::iterator *&tok_it, bool &ok) {
   return block;
 }
 
-Nodep Rules::stat(tokens_t::iterator *&tok_it, bool &ok) {
+Nodep Rules::stat(Rc<TokenpList::iterator> &tok_it, bool &ok) {
   Nodep stat;
   if (tok_it && tok_it->value()->type != ENDCODE && ok) {
 
@@ -456,7 +457,7 @@ Nodep Rules::stat(tokens_t::iterator *&tok_it, bool &ok) {
     // Varlist/functioncall
     else {
       bool ret = true;
-      tokens_t::iterator *init_it = tok_it;
+      Rc<TokenpList::iterator> init_it = tok_it;
       stat = new Node(STAT);
 
       // Varlist
@@ -494,8 +495,8 @@ Nodep Rules::stat(tokens_t::iterator *&tok_it, bool &ok) {
   return stat;
 }
 
-Nodep Rules::varlist(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::varlist(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep varlist;
   if (tok_it->value()->type != ENDCODE) {
     varlist = new Node(VARLIST);
@@ -514,9 +515,9 @@ Nodep Rules::varlist(tokens_t::iterator *&tok_it, bool &ok) {
   return varlist;
 }
 
-Nodep Rules::var_or_funcall(tokens_t::iterator *&tok_it, bool &ok,
+Nodep Rules::var_or_funcall(Rc<TokenpList::iterator> &tok_it, bool &ok,
                             LuaNode expected) {
-  tokens_t::iterator *init_it = tok_it;
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep var;
   if (tok_it->value()->type == ID) {
     var = new Node(VAR);
@@ -588,8 +589,8 @@ Nodep Rules::var_or_funcall(tokens_t::iterator *&tok_it, bool &ok,
   return var;
 }
 
-Nodep Rules::explist(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::explist(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep explist = new Node(EXPLIST);
   explist->append(Rules::exp(tok_it, ok));
   while (tok_it->value()->type == COMMA && ok) {
@@ -604,8 +605,8 @@ Nodep Rules::explist(tokens_t::iterator *&tok_it, bool &ok) {
   return explist;
 }
 
-Nodep Rules::exp(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::exp(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep exp = new Node(EXP);
   bool expect_exp = false;
   while (tok_it->value()->type != ENDCODE && ok) {
@@ -665,8 +666,8 @@ Nodep Rules::exp(tokens_t::iterator *&tok_it, bool &ok) {
   return exp;
 }
 
-Nodep Rules::prefixexp(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::prefixexp(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   bool ret = true;
   Nodep prefixexp;
   if (tok_it->value()->type == OPAR) {
@@ -700,8 +701,8 @@ Nodep Rules::prefixexp(tokens_t::iterator *&tok_it, bool &ok) {
   return prefixexp;
 }
 
-Nodep Rules::args(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::args(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep args = new Node(ARGS);
 
   if (tok_it->value()->type == OPAR) {
@@ -727,8 +728,8 @@ Nodep Rules::args(tokens_t::iterator *&tok_it, bool &ok) {
   return args;
 }
 
-Nodep Rules::table(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::table(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   if (tok_it->value()->type != OBRACE) {
     AST_ERROR(tok_it->value(), "Missing opening brace for table");
     ok = false;
@@ -792,8 +793,8 @@ Nodep Rules::table(tokens_t::iterator *&tok_it, bool &ok) {
   return table;
 }
 
-Nodep Rules::funcname(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::funcname(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep funcname;
 
   if (tok_it->value()->type == ID && ok) {
@@ -825,8 +826,8 @@ Nodep Rules::funcname(tokens_t::iterator *&tok_it, bool &ok) {
   return funcname;
 }
 
-Nodep Rules::funcbody(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::funcbody(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep funcbody;
 
   if (tok_it->value()->type == OPAR && ok) {
@@ -866,8 +867,8 @@ Nodep Rules::funcbody(tokens_t::iterator *&tok_it, bool &ok) {
   return funcbody;
 }
 
-Nodep Rules::parlist(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::parlist(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep parlist;
   if (tok_it->value()->type == VARARGS) {
     parlist = Rules::node(tok_it, PARLIST);
@@ -887,8 +888,8 @@ Nodep Rules::parlist(tokens_t::iterator *&tok_it, bool &ok) {
   return parlist;
 }
 
-Nodep Rules::retstat(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::retstat(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep retstat;
 
   if (tok_it->value()->type == RETURN) {
@@ -907,8 +908,8 @@ Nodep Rules::retstat(tokens_t::iterator *&tok_it, bool &ok) {
   return retstat;
 }
 
-Nodep Rules::namelist(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::namelist(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep namelist;
 
   if (tok_it->value()->type == ID && ok) {
@@ -939,8 +940,8 @@ Nodep Rules::namelist(tokens_t::iterator *&tok_it, bool &ok) {
   return namelist;
 }
 
-Nodep Rules::attnamelist(tokens_t::iterator *&tok_it, bool &ok) {
-  tokens_t::iterator *init_it = tok_it;
+Nodep Rules::attnamelist(Rc<TokenpList::iterator> &tok_it, bool &ok) {
+  Rc<TokenpList::iterator> init_it = tok_it;
   Nodep attnamelist;
 
   if (tok_it->value()->type == ID && ok) {
@@ -998,7 +999,7 @@ Nodep Rules::attnamelist(tokens_t::iterator *&tok_it, bool &ok) {
   return attnamelist;
 }
 
-Nodep Rules::node(tokens_t::iterator *&tok_it, LuaNode type) {
+Nodep Rules::node(Rc<TokenpList::iterator> &tok_it, LuaNode type) {
   Nodep n(new Node(type, tok_it->value()));
   tok_it = tok_it->next();
   return n;

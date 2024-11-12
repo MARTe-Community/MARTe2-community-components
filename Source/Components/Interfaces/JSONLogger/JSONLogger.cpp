@@ -156,7 +156,7 @@ void *flush(void *payload) {
   }
 
   if (info.file == NULL_PTR(FILE *)) {
-    fprintf(stderr, "\e[31m[ERROR]\e[0m Impossible to open logfile: %s\n",
+    fprintf(stderr, "  \e[31m[ERROR]\e[0m Impossible to open logfile: %s\n",
             info.logpath);
     info.file = stdout;
   }
@@ -249,12 +249,12 @@ bool JSONLogger::Initialise(StructuredDataI &data) {
   StreamString str;
 
   if (!(ok = data.Read("LogPath", str))) {
-    fprintf(stderr, "\e[31m[ERROR]\e[0m Missing mandatory field `LogPath`\n");
+    fprintf(stderr, "  \e[31m[ERROR]\e[0m Missing mandatory field `LogPath`\n");
   } else if (StringHelper::Compare(str.Buffer(), "stdout") == 0) {
-    fprintf(stderr, "\e[34m[INFO]\e[0m Logging to `stdout`\n");
+    fprintf(stderr, "  \e[34m[INFO]\e[0m Logging to `stdout`\n");
     info.file = stdout;
   } else if (StringHelper::Compare(str.Buffer(), "stderr") == 0) {
-    fprintf(stderr, "\e[34m[INFO]\e[0m Logging to `stderr`\n");
+    fprintf(stderr, "  \e[34m[INFO]\e[0m Logging to `stderr`\n");
     info.file = stderr;
   } else {
     if (unique_file) {
@@ -265,17 +265,17 @@ bool JSONLogger::Initialise(StructuredDataI &data) {
     info.logpath = new char[str.Size() + 1];
     StringHelper::Copy(info.logpath, str.Buffer());
     info.logpath[str.Size()] = 0;
-    fprintf(stderr, "\e[34m[INFO]\e[0m Log path: %s\n", info.logpath);
+    fprintf(stderr, "  \e[34m[INFO]\e[0m Log path: %s\n", info.logpath);
     info.file = fopen(info.logpath, "a");
     if (info.file == NULL_PTR(FILE *)) {
       ok = false;
-      fprintf(stderr, "\e[31m[ERROR]\e[0m Impossible to open `%s`\n",
+      fprintf(stderr, "  \e[31m[ERROR]\e[0m Impossible to open `%s`\n",
               info.logpath);
     }
   }
   if (!data.Read("FlushDelay", info.flush_delay_us)) {
     info.flush_delay_us = 1000;
-    fprintf(stderr, "\e[34m[INFO]\e[0m Flush delay: 1ms\n");
+    fprintf(stderr, "  \e[34m[INFO]\e[0m Flush delay: 1ms\n");
   }
 
   return ok;

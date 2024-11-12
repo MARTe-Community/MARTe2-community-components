@@ -28,8 +28,7 @@ SPB = Helpers.x Types.x
 
 ROOT_DIR=../../..
 
-PACKAGE=Components
-ROOT_DIR=../../..
+PACKAGE=Core
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)

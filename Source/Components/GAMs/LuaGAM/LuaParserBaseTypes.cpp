@@ -192,7 +192,7 @@ void tokens_t::add_long_bracket_token(strList code_lines, uint32 &line_index,
 uint32 tokens_t::len() { return toks.len(); }
 
 void tokens_t::print() {
-  for (TokenpList::iterator *it = toks.iterate(); it; it = it->next()) {
+  for (Rc<TokenpList::iterator>it = toks.iterate(); it; it = it->next()) {
     printf("%s\n", it->value()->toString().cstr());
   }
 }
@@ -261,9 +261,7 @@ void Node::del() {
   for (uint32 i = 0; i < sub_nodes.len(); i++) {
     sub_nodes[i]->del();
   }
-  for (uint32 i = 0; i < sub_nodes.len(); i++) {
-    sub_nodes.pop();
-  }
+  sub_nodes.clear();
 }
 } // namespace LUA
 } // namespace MARTe

@@ -1,5 +1,5 @@
-#ifndef _LUA_GAM_TEST_H__
-#define _LUA_GAM_TEST_H__
+#ifndef LUA_GAM_TEST_H__
+#define LUA_GAM_TEST_H__
 
 class LuaGAMTest {
 public:

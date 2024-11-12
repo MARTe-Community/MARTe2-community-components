@@ -24,7 +24,7 @@
 
 OBJSX=
 
-SPB = HTTPDynamicMessageInterface.x JSONLogger.x
+SPB = HttpDynamicMessageInterface.x JSONLogger.x
 
 ROOT_DIR=../../..
 

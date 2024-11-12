@@ -23,6 +23,17 @@ namespace MARTe {
  nullified or not.
 **/
 template <typename T> class Rc {
+protected:
+  inline uint32 &GetRefCounter() {
+    assert(refCounter_ != NULL_PTR(uint32 *));
+    return *refCounter_;
+  }
+
+  inline uint32 &GetWeakCounter() {
+    assert(weakCounter_ != NULL_PTR(uint32 *));
+    return *weakCounter_;
+  }
+
 private:
   T *pointer_;
   uint32 *refCounter_;
@@ -81,14 +92,16 @@ public:
    **/
   inline Rc()
       : pointer_(NULL_PTR(T *)), refCounter_(NULL_PTR(uint32 *)),
-        weakCounter_(NULL_PTR(uint32 *)), isNull_(NULL_PTR(bool *)), isWeak_(false) {}
+        weakCounter_(NULL_PTR(uint32 *)), isNull_(NULL_PTR(bool *)),
+        isWeak_(false) {}
   /**
    * @brief Create a smart pointer from a regular pointer.
    *
    * The owenership of the pointer will be moved to the smart pointer.
    **/
   inline Rc(T *p)
-      : pointer_(p), refCounter_(p == NULL_PTR(T *) ? NULL_PTR(uint32 *) : new uint32(1)),
+      : pointer_(p),
+        refCounter_(p == NULL_PTR(T *) ? NULL_PTR(uint32 *) : new uint32(1)),
         weakCounter_(p == NULL_PTR(T *) ? NULL_PTR(uint32 *) : new uint32(0)),
         isNull_(p == NULL_PTR(T *) ? NULL_PTR(bool *) : new bool(false)),
         isWeak_(false) {}
@@ -109,7 +122,8 @@ public:
       : pointer_(other.pointer_), refCounter_(other.refCounter_),
         weakCounter_(other.weakCounter_), isNull_(other.isNull_),
         isWeak_(other.isWeak_) {
-    if (other.refCounter_ != NULL_PTR(uint32 *) && !other.isWeak_ && this != &other) {
+    if (other.refCounter_ != NULL_PTR(uint32 *) && !other.isWeak_ &&
+        this != &other) {
       *other.refCounter_ = *other.refCounter_ + 1;
     } else if (other.isWeak_ && !other.isNull()) {
       *other.weakCounter_ = *other.weakCounter_ + 1;

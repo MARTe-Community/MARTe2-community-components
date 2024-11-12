@@ -1,8 +1,8 @@
-#include "Verifier.h"
 #include "AST.h"
 #include "AdvancedErrorManagement.h"
 #include "ErrorType.h"
 #include "LuaParserBaseTypes.h"
+#include "Verifier.h"
 
 namespace MARTe {
 namespace LUA {
@@ -12,9 +12,9 @@ bool check_(Nodep node, const char8 *name, LuaNode node_type, uint32 &row,
             uint32 &col) {
   bool found = false;
   if (node->type == node_type) {
-    for (NodepList::iterator *it = node->sub_nodes.iterate(); it && !found;
+    for (Rc<NodepList::iterator> it = node->sub_nodes.iterate(); it && !found;
          it = it->next()) {
-      for (NodepList::iterator *jt = it->value()->sub_nodes.iterate();
+      for (Rc<NodepList::iterator> jt = it->value()->sub_nodes.iterate();
            jt && !found; jt = jt->next()) {
         if ((!jt->value()->tok.isNull()) && (jt->value()->tok->raw == name)) {
           found = true;
@@ -25,7 +25,7 @@ bool check_(Nodep node, const char8 *name, LuaNode node_type, uint32 &row,
     }
   }
   if (!found) {
-    for (NodepList::iterator *it = node->sub_nodes.iterate(); it;
+    for (Rc<NodepList::iterator> it = node->sub_nodes.iterate(); it;
          it = it->next()) {
       if (check_(it->value(), name, node_type, row, col)) {
         found = true;
@@ -48,7 +48,7 @@ void get_(Nodep node, LuaNode type, NodepList &list) {
       (node->sub_nodes[0]->tok->raw != NULL_PTR(char8 *))) {
     list.append(node);
   }
-  for (NodepList::iterator *it = node->sub_nodes.iterate(); it;
+  for (Rc<NodepList::iterator> it = node->sub_nodes.iterate(); it;
        it = it->next()) {
     get_(it->value(), type, list);
   }
@@ -56,7 +56,7 @@ void get_(Nodep node, LuaNode type, NodepList &list) {
 
 NodepList ExtractVariables(const ast_t &ast) {
   NodepList variables;
-  for (NodepList::iterator *it = ast.nodes.iterate(); it; it = it->next()) {
+  for (Rc<NodepList::iterator> it = ast.nodes.iterate(); it; it = it->next()) {
     get_(it->value(), VAR, variables);
   }
   return variables;
@@ -66,7 +66,7 @@ bool Check(const ast_t &ast, const char8 *id, LuaNode type, uint32 &row,
            uint32 &col) {
 
   bool found = false;
-  for (NodepList::iterator *it = ast.nodes.iterate(); it; it = it->next()) {
+  for (Rc<NodepList::iterator> it = ast.nodes.iterate(); it; it = it->next()) {
     if (check_(it->value(), id, type, row, col)) {
       found = true;
       break;
@@ -138,14 +138,14 @@ bool LuaGAMValidator::validate_output_signal(const char8 *name,
   return ok;
 }
 
-const Str &var_name(NodepList::iterator *it) {
+const Str &var_name(Rc<NodepList::iterator> it) {
   return it->value()->sub_nodes[0]->tok->raw;
 }
 
 bool LuaGAMValidator::check_variables_initialisation(const char8 **names,
                                                      const uint32 len) {
   bool ok = true;
-  for (NodepList::iterator *it = variables.iterate(); it; it = it->next()) {
+  for (Rc<NodepList::iterator> it = variables.iterate(); it; it = it->next()) {
     ok = false;
     for (uint32 i = 0; i < len; i++) {
       if (var_name(it) == names[i]) {
@@ -172,7 +172,7 @@ bool LuaGAMValidator::check_gam() {
         ast.nodes.len());
     return false;
   }
-  for (NodepList::iterator *it = ast[0]->sub_nodes.iterate(); it;
+  for (Rc<NodepList::iterator> it = ast[0]->sub_nodes.iterate(); it;
        it = it->next()) {
     if (it->value()->type == STAT &&
         it->value()->sub_nodes[0]->type == FUNCNAME &&

@@ -31,8 +31,9 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "LuaParser.h"
 #include "AdvancedErrorManagement.h"
+#include "Architecture/x86_gcc/CompilerTypes.h"
+#include "LuaParser.h"
 #include "StringHelper.h"
 
 /*---------------------------------------------------------------------------*/
@@ -305,9 +306,9 @@ bool check_variable(Nodep node, const char8 *name, LuaNode node_type,
                     uint32 &line_i, uint32 &col_i) {
   bool found = false;
   if (node->type == node_type) {
-    for (NodepList::iterator *it = node->sub_nodes.iterate(); it && !found;
+    for (Rc<NodepList::iterator> it = node->sub_nodes.iterate(); it && !found;
          it = it->next()) {
-      for (NodepList::iterator *jt = it->value()->sub_nodes.iterate();
+      for (Rc<NodepList::iterator> jt = it->value()->sub_nodes.iterate();
            jt && !found; jt = jt->next()) {
         if (!jt->value()->tok.isNull() && jt->value()->tok->raw == name) {
           found = true;
@@ -318,7 +319,7 @@ bool check_variable(Nodep node, const char8 *name, LuaNode node_type,
     }
   }
   if (!found) {
-    for (NodepList::iterator *it = node->sub_nodes.iterate(); it;
+    for (Rc<NodepList::iterator> it = node->sub_nodes.iterate(); it;
          it = it->next()) {
       if (check_variable(it->value(), name, node_type, line_i, col_i)) {
         found = true;
@@ -340,15 +341,16 @@ strList linearize(const char8 *code) {
   Str code_s = code;
   uint32 code_pos = 0;
   code_s = code_s + '\n';
-  int32 newline_i = code_s.find("\n");
-  while (newline_i >= 0) {
-    uint32 nl = newline_i == 0 ? (newline_i + 1) : newline_i;
+  Option<uint32> maybe_eol_i = code_s.find("\n");
+  while (!maybe_eol_i.empty()) {
+    uint32 eol_i = maybe_eol_i.val();
+    uint32 nl = eol_i == 0 ? (eol_i + 1) : eol_i;
     Str line = code_s.substr(0, nl);
     if (line.len() > 0) {
       lines.append(line);
     }
-    code_s = code_s.substr(newline_i + 1, 0);
-    newline_i = code_s.find("\n");
+    code_s = code_s.substr(eol_i + 1, 0);
+    maybe_eol_i = code_s.find("\n");
   }
   return lines;
 }
@@ -390,14 +392,14 @@ Tokenp get_long_bracket_token(strList code_lines, uint32 &line_index,
   if (ok) {
     Str line_str = line;
     uint32 init_line_index = line_index;
-    int32 end_index = line_str.find(closing_long_bracket);
-    if (end_index < 0 && line_index + 1 < code_lines.len()) {
+    Option<uint32> end_index = line_str.find(closing_long_bracket);
+    if (end_index.empty() && line_index + 1 < code_lines.len()) {
       long_token = long_token + line_str;
       line_index++;
       line_str = code_lines[line_index];
       end_index = line_str.find(closing_long_bracket);
     }
-    while (end_index < 0 && line_index + 1 < code_lines.len()) {
+    while (end_index.empty() && line_index + 1 < code_lines.len()) {
       long_token = long_token + '\n';
       long_token = long_token + line_str;
       line_index++;
@@ -407,8 +409,8 @@ Tokenp get_long_bracket_token(strList code_lines, uint32 &line_index,
     if (line_index > init_line_index && long_token[-1] != '\n') {
       long_token = long_token + '\n';
     }
-    if (end_index > 0) {
-      long_token = long_token + line_str.substr(0, end_index);
+    if (!end_index.empty() && end_index.val() > 0) {
+      long_token = long_token + line_str.substr(0, end_index.val());
     }
     long_token = long_token + closing_long_bracket;
     t = new Token(long_token.cstr(), long_token.len(), init_line_index,
@@ -450,27 +452,25 @@ tokens_t scan(const char8 *code, bool &ok) {
       // Check for string
       else if (line[line_pos + char_pos] == '\"' ||
                line[line_pos + char_pos] == '\'') {
-        char8 apex[2];
-        apex[0] = line[line_pos + char_pos];
-        apex[1] = 0;
+        char8 apex = line[line_pos + char_pos];
         uint32 closing_quotes_index = 0;
         while (true) {
-          int32 end_string =
+          Option<uint32> end_string =
               line.find(apex, line_pos + char_pos + closing_quotes_index + 1);
-          if (end_string < 0) {
+          if (end_string.empty()) {
             TOKEN_ERROR(line, line_index, line_pos + char_pos,
                         "String not closed.");
             ok = false;
             break;
           }
-          if (line[end_string - 1] != '\\') {
-            tokens.add(line.substr(line_pos + char_pos, end_string + 1),
+          if (line[end_string.val() - 1] != '\\') {
+            tokens.add(line.substr(line_pos + char_pos, end_string.val() + 1),
                        line_index, line_pos + char_pos);
-            line_pos = end_string + 1;
+            line_pos = end_string.val() + 1;
             char_pos = 0;
             break;
           } else {
-            closing_quotes_index = end_string;
+            closing_quotes_index = end_string.val();
           }
         }
       } else if (line.substr(line_pos + char_pos, 0).len() > 2 &&

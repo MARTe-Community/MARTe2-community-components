@@ -24,7 +24,7 @@
 
 OBJSX = LuaGAMTest.x LuaGAMGTest.x
 
-PACKAGE=Components/DataSources
+PACKAGE=Components/GAMs
 ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)

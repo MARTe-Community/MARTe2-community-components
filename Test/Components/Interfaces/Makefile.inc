@@ -24,7 +24,7 @@
 #
 #############################################################
 
-SPB = JSONLogger.x HTTPDynamicMessageInterface.x
+SPB = JSONLogger.x HttpDynamicMessageInterface.x
 
 
 ROOT_DIR=../../..

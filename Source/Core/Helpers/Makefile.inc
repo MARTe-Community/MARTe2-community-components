@@ -24,7 +24,7 @@
 
 OBJSX= Helpers.x
 
-PACKAGE=Core/Helpers
+PACKAGE=Core
 
 ROOT_DIR=../../..
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults

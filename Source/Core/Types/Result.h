@@ -1,6 +1,6 @@
 #ifndef RESULT_H__
 #define RESULT_H__
-#include "Error.h"
+#include "ErrorType.h"
 #include <assert.h>
 
 namespace MARTe {
@@ -21,7 +21,7 @@ namespace MARTe {
   Below an example of usage can be found:
   <pre>
   Result<float> safe::sqrt(float x) {
-    if (x < 0) return Result(ERROR(E_MATH));
+    if (x < 0) return Result<float>::Fail(RuntimeError);
     return math::sqrt(x);
   }
   </pre>
@@ -35,49 +35,46 @@ namespace MARTe {
     }
   </pre>
 */
-template <typename T, typename E = ExtendedError> class Result {
+template <typename T, typename E = ErrorManagement::ErrorType> class Result {
 public:
-  /**
-    @brief Constructor of the `Result` object when
-    the operation is succesful.
-
-    @param val the result of the operation to be returned
-  */
-  Result(const T &val) : ok_(true) {
-    res_ = new T(val);
-    count_ = new uint32(1);
+  inline static Result<T, E> Succ(const T &value) {
+    Result r;
+    r.ok_ = true;
+    r.res_ = new T(value);
+    return r;
   }
-
-  /**
-    @brief Constructor of the `Result` object
-    when the operation is unsuccesful.
-
-    @param e the Error to be returned.
-  */
-  Result(const E &e) : ok_(false) {
-    res_ = new E(e);
-    count_ = new uint32(1);
+  inline static Result<T, E> Fail(const E &error) {
+    Result r;
+    r.ok_ = false;
+    r.res_ = new E(error);
+    return r;
   }
   /**
     @brief copy constructor
     @param other result to be copied
   **/
-  Result(const Result &other)
-      : ok_(other.ok_), res_(other.res_), count_(other.count_) {
-    (*count_)++;
+  inline Result(const Result &other) : ok_(other.ok_), res_(NULL_PTR(void *)) {
+    if (other.res_ != NULL_PTR(void *)) {
+      if (ok_) {
+        res_ = new T(*(T *)other.res_);
+      } else {
+        res_ = new E(*(E *)other.res_);
+      }
+    }
   }
 
+  inline Result(const T &value) : ok_(true) { res_ = new T(value); }
   /**
     @brief destructor
   **/
-  ~Result() { deref(); }
+  inline ~Result() { clear_res(); }
 
   /**
     @brief Method to access the value returned.
 
     @return the value returned from the successful operation
     */
-  T val() const {
+  inline T val() const {
     assert(ok_);
     return *(T *)res_;
   }
@@ -87,10 +84,9 @@ public:
     @return the Error of the unsuccessful operation
     @return NO_ERROR if the operation was successful.
     */
-  const E err() const {
-    if (!ok_)
-      return *(E *)res_;
-    return E();
+  inline const E err() const {
+    assert(!ok_);
+    return *(E *)res_;
   }
 
   /**
@@ -98,7 +94,7 @@ public:
     @return true if failed
     @return false if succeded
   **/
-  bool failed() const { return !ok_; }
+  inline bool failed() const { return !ok_; }
 
   /**i
     @brief Check if the operation succeded or not.
@@ -107,7 +103,7 @@ public:
     @return false if the operation failed and an Error is stored in the Result
     object
   */
-  bool succeded() const { return ok_; }
+  inline bool succeded() const { return ok_; }
 
   /**
     @brief checks if operation did not succeded
@@ -115,13 +111,13 @@ public:
     @return false if succeded
     @return true if failed
   **/
-  bool operator!() const { return !ok_; }
+  inline bool operator!() const { return !ok_; }
 
   /**
     @brief gets the value of the Result
     @return the value if succeded
   **/
-  T operator+() const {
+  inline T operator+() const {
     assert(ok_);
     return *(T *)res_;
   }
@@ -131,8 +127,8 @@ public:
     @return the error if failed
     @return NO_ERROR error if scucceded.
   **/
-  const E operator-() const {
-    assert(!ok_);
+  inline const E operator-() const {
+    assert(!ok_ && res_ != NULL_PTR(void *));
     return *(E *)res_;
   }
 
@@ -141,13 +137,17 @@ public:
     @param other result to copied
     @result updated result
   **/
-  Result &operator=(const Result &other) {
-    if (&other != this && other.count_ != count_) {
-      deref();
-      res_ = other.res_;
+  inline Result &operator=(const Result &other) {
+    if (&other != this) {
       ok_ = other.ok_;
-      count_ = other.count_;
-      (*count_)++;
+      clear_res();
+      if (other.res_ != NULL_PTR(void *)) {
+        if (ok_) {
+          res_ = new T(*(T *)other.res_);
+        } else {
+          res_ = new E(*(E *)other.res_);
+        }
+      }
     }
 
     return *this;
@@ -156,23 +156,19 @@ public:
 private:
   bool ok_;
   void *res_;
-  uint32 *count_;
+  inline void clear_res() {
 
-  void deref() {
-    if (count_ == NULL_PTR(uint32 *))
-      return;
-    (*count_)--;
-    if (*count_ == 0) {
+    if (res_ != NULL_PTR(void *)) {
       if (ok_) {
         delete (T *)res_;
       } else {
         delete (E *)res_;
       }
-      delete count_;
-      count_ = NULL_PTR(uint32 *);
-      res_ = NULL_PTR(void *);
     }
+    res_ = NULL_PTR(void *);
   }
+
+  inline Result() : ok_(false), res_(NULL_PTR(void *)) {}
 };
 } // namespace MARTe
 #endif

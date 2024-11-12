@@ -22,9 +22,9 @@
 #
 #############################################################
 
-OBJSX= Error.x Logging.x Str.x
+OBJSX=Str.x
 
-PACKAGE=Core/Types
+PACKAGE=Core
 
 ROOT_DIR=../../..
 MAKEDEFAULTDIR=$(MARTe2_DIR)/MakeDefaults

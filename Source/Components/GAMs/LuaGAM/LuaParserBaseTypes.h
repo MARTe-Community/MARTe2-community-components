@@ -2,9 +2,9 @@
 #define LUA_PARSER_BASE_TYPES_H__
 
 #include "CompilerTypes.h"
-#include "List.h"
 #include "Rc.h"
 #include "Str.h"
+#include "Vec.h"
 
 #define MAX_LENGTH 256
 #define NUM_LUA_SYNTAX_ELEMENTS 63
@@ -13,7 +13,7 @@
 
 namespace MARTe {
 namespace LUA {
-typedef List<Str> strList;
+typedef Vec<Str> strList;
 enum LuaToken {
   REQUIRE = 0,
   ENDCODE,
@@ -241,7 +241,7 @@ struct Token {
 };
 
 typedef Rc<Token> Tokenp;
-typedef List<Tokenp> TokenpList;
+typedef Vec<Tokenp> TokenpList;
 struct tokens_t {
 
   /**
@@ -309,10 +309,6 @@ struct tokens_t {
    */
   TokenpList toks;
 
-  /**
-   * Tokens iterator
-   */
-  typedef TokenpList::iterator iterator;
 };
 
 /**
@@ -372,13 +368,13 @@ public:
    */
   void del();
 
-  Tokenp tok;            //!< Token linked to this node
-  LuaNode type;          //!< Node type
-  List<Nodep> sub_nodes; //!< List of children nodes
+  Tokenp tok;           //!< Token linked to this node
+  LuaNode type;         //!< Node type
+  Vec<Nodep> sub_nodes; //!< List of children nodes
 };
 
 typedef Rc<Node> Nodep;
-typedef List<Nodep> NodepList;
+typedef Vec<Nodep> NodepList;
 } // namespace LUA
 } // namespace MARTe
 

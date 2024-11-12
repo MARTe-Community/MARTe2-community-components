@@ -244,9 +244,10 @@ Str Str::substr(const int32 start, const int32 end) const {
   return a;
 }
 
-int32 Str::find(Str str, int32 start) const {
-  if (start + str.len() > len())
-    return -1;
+Option<uint32> Str::find(const Str &str, const uint32 &start) const {
+  if (start + str.len() > len() || str.len() == 0) {
+    return Option<uint32>();
+  }
   uint32 i = 0;
   uint32 m = 0;
   for (uint32 n = start; n < len_; n++) {
@@ -255,13 +256,24 @@ int32 Str::find(Str str, int32 start) const {
         i = n;
       }
       if (++m == str.len()) {
-        return i;
+        return Option<uint32>(i);
       }
     } else {
       m = 0;
     }
   }
-  return -1;
+  return Option<uint32>();
+}
+Option<uint32> Str::find(const char &ch, const uint32 &start) const {
+  if (start >= len()) {
+    return Option<uint32>();
+  }
+  for (uint32 i = start; i < len_; i++) {
+    if (mem_[i] == ch) {
+      return Option<uint32>(i);
+    }
+  }
+  return Option<uint32>();
 }
 
 uint32 Str::hash() const {

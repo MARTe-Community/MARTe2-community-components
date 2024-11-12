@@ -1,6 +1,5 @@
-#include "Error.h"
+#include "AdvancedErrorManagement.h"
 #include "FastMath.h"
-#include "Logging.h"
 #include "LuaGAM.h"
 #include "LuaGAMTest.h"
 #include "LuaParser.h"
@@ -13,7 +12,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define LOG(...) log::info(__VA_ARGS__);
+#define LOG(...)                                                               \
+  REPORT_ERROR_STATIC(MARTe::ErrorManagement::Information, __VA_ARGS__);
 
 #define DB_TEST "dbtest"
 
@@ -22,6 +22,7 @@
   printf(__VA_ARGS__);
 
 #define DBG(...) DEBUG_LOG("DBG");
+using namespace MARTe;
 
 /**
   Simple command mapper class that expose internal memory
@@ -35,22 +36,20 @@ public:
   }
 };
 
-bool TestScanning(const char *code, const Str expeted_tokens[],
-                  const uint32 len) {
+bool TestScanning(const char *code, const MARTe::Str expeted_tokens[],
+                  const MARTe::uint32 len) {
   bool ok = true;
   T_ASSERT_TRUE(ok);
   LUA::tokens_t toks;
-  try {
-    toks = LUA::scan(code, ok);
-  } catch (Error &e) {
-    DEBUG_LOG("Test error:%s\n", e.what())
-    ok = false;
-  }
+  toks = LUA::scan(code, ok);
   T_ASSERT_TRUE(ok);
-  T_ASSERT_EQ(toks.len() - 1, len)
+  T_ASSERT_EQ(toks.len() - 1, len);
 
   for (MARTe::uint32 i = 0; i < toks.len() - 1; i++) {
-    T_ASSERT_EQ(toks[i]->raw, expeted_tokens[i]);
+    if (toks[i]->raw != expeted_tokens[i]) {
+      printf("  > Token[%d] `%s` != `%s`\n", i, toks[i]->raw.cstr(), expeted_tokens[i].cstr());
+      T_ASSERT_TRUE(false);
+    }
   }
   return ok;
 }
@@ -132,12 +131,8 @@ bool LuaParserTest::TestParserTokenizeComment() {
 bool TestParse(const char *code) {
   bool ok = true;
   LUA::ast_t ast;
-  try {
-    ast = LUA::parse(code, ok);
-  } catch (Error &e) {
-    DEBUG_LOG("Test error:%s\n", e.what())
-    ok = false;
-  }
+  ;
+  ast = LUA::parse(code, ok);
   T_ASSERT_TRUE(ok);
   return ok;
 }
@@ -245,8 +240,8 @@ char *to_tag(FILE *f, const char *delim, bool &ok) {
   return str;
 }
 
-List<Str> tolines(Str s) {
-  List<Str> lines;
+Vec<Str> tolines(Str s) {
+  Vec<Str> lines;
   uint32 i0 = 0;
   for (uint32 i = 0; i < s.len(); i++) {
     if (s[i] == '\n') {
@@ -265,10 +260,10 @@ Str diff(const char *a, const char *b, uint32 tab = 0) {
   memset(spaces, ' ', tab * 4);
   spaces[tab * 4] = 0;
   Str res;
-  List<Str> line_a = tolines(a);
-  List<Str> line_b = tolines(b);
+  Vec<Str> line_a = tolines(a);
+  Vec<Str> line_b = tolines(b);
   uint32 line = 0;
-  for (List<Str>::iterator *it = line_a.iterate(); it; it = it->next()) {
+  for (Rc<Vec<Str>::iterator> it = line_a.iterate(); it; it = it->next()) {
     line++;
     if (!line_b.contains(it->value())) {
       char num[10];
@@ -283,7 +278,7 @@ Str diff(const char *a, const char *b, uint32 tab = 0) {
   div[(tab + 2) * 4] = '\n';
   div[(tab + 2) * 4 + 1] = 0;
   res = res + div;
-  for (List<Str>::iterator *it = line_b.iterate(); it; it = it->next()) {
+  for (Rc<Vec<Str>::iterator> it = line_b.iterate(); it; it = it->next()) {
     line++;
     if (!line_a.contains(it->value())) {
       char num[10];
@@ -307,7 +302,8 @@ bool run_corpus_test(const uint32 test_i, const char *path, const char *desc,
            desc);
   } else {
     Str ast_computed;
-    for (LUA::NodepList::iterator *it = ast_->iterate(); it; it = it->next()) {
+    for (Rc<LUA::NodepList::iterator> it = ast_->iterate(); it;
+         it = it->next()) {
       ast_computed = ast_computed + it->value()->toString(0, 4, true);
     }
     ok = strcmp(ast_computed.cstr(), ast) == 0;
@@ -369,51 +365,22 @@ bool test_corpus(const char *path) {
 }
 
 bool LuaParserTest::TestParserExpressions() {
-  try {
-    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_exp.corpus"));
-  } catch (ExtendedError &e) {
-    printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
-    return false;
-  }
+  T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_exp.corpus"));
   return true;
 }
 
 bool LuaParserTest::TestParserStatements() {
-  try {
-    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_stat.corpus"));
-  } catch (ExtendedError &e) {
-    printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
-    return false;
-  }
+  T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_stat.corpus"));
   return true;
 }
 
 bool LuaParserTest::TestParserDeclarations() {
-  try {
-    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_decl.corpus"));
-  } catch (ExtendedError &e) {
-    printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
-    return false;
-  }
+  T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_decl.corpus"));
   return true;
 }
 
 bool LuaParserTest::TestParserComments() {
-  try {
-    T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_comm.corpus"));
-  } catch (ExtendedError &e) {
-    printf("Error at %s:%d: '%s'\n", e.file(), e.line(), e.msg());
-    void *array[10];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 10);
-
-    // print out all the frames to stderr
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-
-    return false;
-  }
+  T_ASSERT_TRUE(test_corpus("./Test/Resources/LuaGAM/luaparser_comm.corpus"));
   return true;
 }
 
@@ -456,12 +423,12 @@ bool LuaParserTest::TestParserTreeBuilding() {
   return TestParse(
       "function GAM()\n"                           // function definition
       "  output_sign = input_sign + 1 + sqrt(1)\n" // assignment
-      "  if output_sign>sqrt(3) then\n"    // if statement with binary operator
-      "    print(output_sign)\n"           // function call
-      "  elseif output_sign<=(1+2) then\n" // else if statement with binary
-                                           // operator
-      "    print(1)\n"                     // function call
-      "  else\n"                           // else statement
+      "  if output_sign>sqrt(3) then\n" // if statement with binary operator
+      "    marte.log(tostring(output_sign))\n" // function call
+      "  elseif output_sign<=(1+2) then\n"     // else if statement with binary
+                                               // operator
+      "    print(1)\n"                         // function call
+      "  else\n"                               // else statement
       "    print(2) --random comment\n"
       "  end\n"
       "  do\n"         // do block statement
@@ -812,9 +779,9 @@ bool LuaGAMTest::TestExecWriteInput() {
   MARTe::GAMDB::add_input(db, "x", "int32", DB_TEST);
   MARTe::GAMDB::add_output(db, "y", "int32", DB_TEST);
   const char *code_ = "function GAM()\n"
-                      "  print(y)\n"
+                      "  marte.log(tostring(y))\n"
                       "  y = x + 1\n"
-                      "  print(x)\n"
+                      "  marte.log(tostring(x))\n"
                       "  x = 0\n"
                       "end\n";
   MARTe::GAMDB::set_parameter(db, "Code", code_);
@@ -835,7 +802,7 @@ bool LuaGAMTest::TestExecReadOutput() {
   MARTe::GAMDB::add_input(db, "x", "int32", DB_TEST);
   MARTe::GAMDB::add_output(db, "y", "int32", DB_TEST);
   const char *code = "function GAM()\n"
-                     "  print(y)\n"
+                     "  marte.log(tostring(y))\n"
                      "  if (y > 0) then\n"
                      "    y = x\n"
                      "  else\n"

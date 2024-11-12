@@ -2,6 +2,7 @@
 #define STR_H__
 
 #include "CompilerTypes.h"
+#include "Option.h"
 
 namespace MARTe {
 
@@ -138,19 +139,19 @@ public:
     @param str is the sub string to find
     @param start is the initial index where to start searching
     @return index if found
-    @return -1 if not found or start > len.
   **/
-  int32 find(Str str, int32 start = 0) const;
+  Option<uint32> find(const Str &str, const uint32 &start = 0) const;
+  Option<uint32> find(const char &ch, const uint32 &start = 0) const;
 
   uint32 hash() const;
 
 private:
   void extend(uint32 lenght); /// extend
-  char *mem_; // + 1 for byte 0 containing size and +1 for 0 padding
-  uint32 size_;  // size of memory
-  uint32 len_;   // length of string
+  char *mem_;   // + 1 for byte 0 containing size and +1 for 0 padding
+  uint32 size_; // size of memory
+  uint32 len_;  // length of string
 };
 
-}; // namespace ect
+}; // namespace MARTe
 
 #endif

@@ -24,11 +24,14 @@
 
 include Makefile.inc
 
+BDIR=../../Build/$(TARGET)
+
 LIBRARIES += -L$(GTEST_DIR) -lgtest -lgtest_main -lpthread
 
 LIBRARIES += -L$(ROOT_DIR)/Source/Components/GAMs/LuaGAM/luajit/src -lluajit
 LIBRARIES += -L$(MARTe2_LIB_DIR) -lMARTe2 
 LIBRARIES += -ldl
+
 
 
 #Look for all the statically linked files

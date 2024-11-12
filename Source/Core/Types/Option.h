@@ -130,13 +130,6 @@ public:
     }
     return *this;
   }
-  /**
-   * @brief access internal methods/field of the pointer.
-   **/
-  inline T *operator->() {
-    assert(mem != NULL_PTR(T *));
-    return mem;
-  }
 };
 
 } // namespace MARTe
